@@ -5,11 +5,9 @@ import "ol/ol.css";
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
-// --- 1. CAMBIA 'XYZ' POR 'OSM' ---
 import OSM from "ol/source/OSM";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { ScaleLine, defaults as defaultControls } from "ol/control";
-// --- 2. IMPORTA EL TIPO PARA EL EVENTO DE CLIC ---
 import { type MapBrowserEvent } from "ol";
 
 const plConstitutionCoords = [-4.4214, 36.7202]; //Coordenadas de Málaga, el mapa sale centrado en Málaga

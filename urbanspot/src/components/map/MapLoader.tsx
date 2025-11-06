@@ -5,7 +5,6 @@
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 
-// Importamos los tipos para las coordenadas
 type Coords = {
   lat: number;
   lon: number;
@@ -13,7 +12,7 @@ type Coords = {
 
 export default function MapLoader() {
   const UrbanMap = useMemo(() => dynamic(
-    () => import('@/components/UrbanMap'),
+    () => import('@/components/map/UrbanMap'),
     { 
       loading: () => <p>Cargando mapa...</p>,
       ssr: false
