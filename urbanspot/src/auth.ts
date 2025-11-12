@@ -7,10 +7,9 @@ import bcrypt from "bcrypt";
 
 // Proveedores
 import Credentials from "next-auth/providers/credentials";
-// Proveedores comentados (para que Vercel no falle)
-// import GitHub from "next-auth/providers/github";
-// import Google from "next-auth/providers/google";
-// import Twitter from "next-auth/providers/twitter";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+import Twitter from "next-auth/providers/twitter";
 
 // Adaptador de Base de Datos
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
@@ -26,7 +25,7 @@ export const {
   adapter: MongoDBAdapter(clientPromise),
 
   providers: [
-    /* --- PROVEEDORES OAUTH COMENTADOS, HAY QUE AÑADIR LAS KEYS---
+  
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
@@ -39,7 +38,7 @@ export const {
       clientId: process.env.TWITTER_ID ?? "",
       clientSecret: process.env.TWITTER_SECRET ?? "",
     }),
-    */
+    
     
     // Proveedor de Credentials (Email/Contraseña)
     Credentials({
