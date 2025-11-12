@@ -1,25 +1,16 @@
 // src/app/page.tsx
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-import MapLoader from '@/components/map/MapLoader'; // (Ruta actualizada)
-import { HeaderMenu } from '@/components/layout/HeaderMenu'; // 1. Importa el menú
+export default async function RootPage() {
+  // Obtenemos la sesión del usuario
+  const session = await auth();
 
-export default function Home() {
-  
-  return (
-    
-    <main className="flex flex-col h-screen w-screen">
-      
-      <header className="bg-white shadow-md p-4 z-10 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">🏙️ UrbanSpot</h1>
-        
-        <HeaderMenu />
-      </header>
+  // Si no está autenticado -> /login
+  if (!session?.user) {
+    redirect("/login");
+  }
 
-      {/*Renderizar el Mapa */}
-      <div className="flex-grow relative">
-        <MapLoader />
-      </div>
-
-    </main>
-  );
+  // Si sí está autenticado -> /home
+  redirect("/home");
 }

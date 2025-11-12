@@ -1,4 +1,6 @@
 "use client"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,29 +10,102 @@ import {
   FieldGroup,
   FieldSeparator,
 } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { signIn } from "next-auth/react"
 import Image from "next/image"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+  const router = useRouter();
+  const [isRegister, setIsRegister] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (isRegister) {
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password }),
+        });
+
+        if (res.status === 201) {
+          const signInRes = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+          if (signInRes?.ok) router.push("/home");
+          else setError("No se pudo iniciar sesión tras registrarse");
+        } else {
+          const data = await res.json();
+          setError(data.message || "Error desconocido al registrarse");
+        }
+      } catch {
+        setError("Error de conexión");
+      }
+    } else {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (res?.ok) router.push("/home");
+      else setError("Email o contraseña incorrectos");
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Bienvenido</h1>
+                <h1 className="text-2xl font-bold">{isRegister ? "Crea una cuenta" : "Bienvenido"}</h1>
                 <p className="text-muted-foreground text-balance">
-                  Inicia sesión en UrbanSpot
+                  {isRegister ? "Rellena tus datos para unirte" : "Inicia sesión en UrbanSpot"}
                 </p>
               </div>
 
+              {/* Campos del formulario */}
+              <div className="grid gap-4">
+                {isRegister && (
+                  <Field>
+                    <Label htmlFor="name">Nombre</Label>
+                    <Input id="name" type="text" value={name} onChange={e => setName(e.target.value)} required />
+                  </Field>
+                )}
+
+                <Field>
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                </Field>
+
+                <Field>
+                  <Label htmlFor="password">Contraseña</Label>
+                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                </Field>
+
+                {error && <p className="text-sm text-destructive text-center">{error}</p>}
+
+                <Button type="submit" className="w-full">
+                  {isRegister ? "Registrarse" : "Iniciar Sesión"}
+                </Button>
+              </div>
+
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Inicia sesión con
+                O continúa con
               </FieldSeparator>
 
               <Field className="grid gap-4">
-                {/* Google */}
                 <Button
                   variant="outline"
                   type="button"
@@ -46,7 +121,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   Iniciar sesión con Google
                 </Button>
 
-                {/* GitHub */}
                 <Button
                   variant="outline"
                   type="button"
@@ -59,7 +133,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   Iniciar sesión con GitHub
                 </Button>
 
-                {/* X */}
                 <Button
                   variant="outline"
                   type="button"
@@ -78,18 +151,26 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               </Field>
 
               <FieldDescription className="text-center">
-                ¿No tienes una cuenta? <a href="#">Regístrate</a>
+                {isRegister ? "¿Ya tienes cuenta?" : "¿No tienes una cuenta?"}{" "}
+                <Button
+                  variant="link"
+                  type="button"
+                  onClick={() => { setIsRegister(!isRegister); setError(""); }}
+                  className="p-0 h-auto"
+                >
+                  {isRegister ? "Inicia sesión" : "Regístrate"}
+                </Button>
               </FieldDescription>
             </FieldGroup>
           </form>
 
-          <div className="bg-[#191e21] hidden md:block content-center">
+          <div className="bg-[#191e21] hidden md:flex items-center justify-center">
             <Image
               src="/logo_bg.png"
               alt="Logo UrbanSpot"
-              width={50}
-              height={50}
-              className="h-[50%] w-[50%] mx-auto"
+              width={150}
+              height={150}
+              className="mx-auto"
             />
           </div>
         </CardContent>

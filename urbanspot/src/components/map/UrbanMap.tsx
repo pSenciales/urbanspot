@@ -8,7 +8,6 @@ import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { ScaleLine, defaults as defaultControls } from "ol/control";
-import { type MapBrowserEvent } from "ol";
 
 const plConstitutionCoords = [-4.4214, 36.7202]; //Coordenadas de Málaga, el mapa sale centrado en Málaga
 const mapCenter = fromLonLat(plConstitutionCoords);
