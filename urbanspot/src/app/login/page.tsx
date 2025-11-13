@@ -13,7 +13,7 @@ export default function Login() {
   // Redirección automática si el usuario ya está logueado
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/user");
+      router.replace("/home");
     }
   }, [status, router]);
 
