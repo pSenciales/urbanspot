@@ -1,7 +1,6 @@
 // src/auth.ts
 import NextAuth from "next-auth";
 import { User } from "next-auth";
-// --- 1. IMPORTACIONES CORREGIDAS ---
 import { Collection, ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 
@@ -9,7 +8,7 @@ import bcrypt from "bcrypt";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import Twitter from "next-auth/providers/twitter";
+//import Twitter from "next-auth/providers/twitter";
 
 // Adaptador de Base de Datos
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
@@ -34,10 +33,10 @@ export const {
       clientId: process.env.GITHUB_ID ?? "",
       clientSecret: process.env.GITHUB_SECRET ?? "",
     }),
-    Twitter({
+    /*Twitter({
       clientId: process.env.TWITTER_ID ?? "",
       clientSecret: process.env.TWITTER_SECRET ?? "",
-    }),
+    }),*/
     
     
     // Proveedor de Credentials (Email/Contraseña)

@@ -132,7 +132,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   </svg>
                   Iniciar sesión con GitHub
                 </Button>
-
+                {/*
                 <Button
                   variant="outline"
                   type="button"
@@ -147,7 +147,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     height={20}
                   />
                   Iniciar sesión con X
-                </Button>
+                </Button>*/}
               </Field>
 
               <FieldDescription className="text-center">
