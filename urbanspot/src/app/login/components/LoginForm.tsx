@@ -1,3 +1,4 @@
+"use client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -5,15 +6,12 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { signIn } from "next-auth/react"
+import Image from "next/image"
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -26,76 +24,77 @@ export function LoginForm({
                   Inicia sesión en UrbanSpot
                 </p>
               </div>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
-              </Field>
-              <Field>
-                <Button type="submit">Iniciar sesión</Button>
-              </Field>
+
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                O continuar con
+                Inicia sesión con
               </FieldSeparator>
-              <Field className="grid grid-cols-3 gap-4">
-                <Button variant="outline" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                      fill="currentColor"
-                    />
+
+              <Field className="grid gap-4">
+                {/* Google */}
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => signIn("google")}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-5 w-5">
+                    <path fill="#EA4335" d="M24 9.5c3.94 0 6.6 1.7 8.1 3.1l5.9-5.9C34.3 3.2 29.7 1 24 1 14.8 1 7.1 6.8 4.3 14.8l7 5.4C12.8 14.4 17.9 9.5 24 9.5z" />
+                    <path fill="#34A853" d="M24 44c5.7 0 10.4-1.9 13.9-5.2l-6.4-5.2c-1.8 1.2-4.1 2-7.5 2-5.8 0-10.8-3.9-12.6-9.1l-7 5.4C7.1 40.9 14.8 44 24 44z" />
+                    <path fill="#4A90E2" d="M44.5 24c0-1.5-.1-2.9-.3-4.3H24v8.1h11.6c-.5 2.7-1.9 5.1-4.1 6.8l6.4 5.2C41.6 36.6 44.5 30.9 44.5 24z" />
+                    <path fill="#FBBC05" d="M11.4 26.5c-.4-1.2-.6-2.4-.6-3.5s.2-2.3.6-3.5l-7-5.4C3.5 17.1 3 20.5 3 23s.5 5.9 1.4 8.9l7-5.4z" />
                   </svg>
-                  <span className="sr-only">Iniciar sesión con Apple</span>
+                  Iniciar sesión con Google
                 </Button>
-                <Button variant="outline" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor"
-                    />
+
+                {/* GitHub */}
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => signIn("github")}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 007.86 10.93c.58.1.79-.25.79-.55v-1.92c-3.2.7-3.88-1.54-3.88-1.54-.53-1.33-1.3-1.68-1.3-1.68-1.06-.73.08-.72.08-.72 1.17.08 1.78 1.22 1.78 1.22 1.04 1.77 2.73 1.26 3.4.97.1-.76.41-1.27.75-1.56-2.55-.29-5.23-1.27-5.23-5.64 0-1.25.44-2.26 1.17-3.05-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.16a10.9 10.9 0 015.73 0c2.19-1.47 3.15-1.16 3.15-1.16.62 1.58.23 2.75.12 3.04.73.79 1.16 1.8 1.16 3.05 0 4.39-2.69 5.35-5.26 5.63.42.36.8 1.08.8 2.19v3.25c0 .3.21.65.8.54A11.51 11.51 0 0023.5 12C23.5 5.65 18.35.5 12 .5z" />
                   </svg>
-                  <span className="sr-only">Iniciar sesión con Google</span>
+                  Iniciar sesión con GitHub
                 </Button>
-                <Button variant="outline" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span className="sr-only">Iniciar sesión con Meta</span>
+
+                {/* X */}
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => signIn("twitter")}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Image
+                    src="/x-logo-black.png"
+                    alt="X logo"
+                    className="h-3 w-3"
+                    width={20}
+                    height={20}
+                  />
+                  Iniciar sesión con X
                 </Button>
               </Field>
+
               <FieldDescription className="text-center">
-                ¿No tienes una cuenta? <a href="#">Registrate</a>
+                ¿No tienes una cuenta? <a href="#">Regístrate</a>
               </FieldDescription>
             </FieldGroup>
           </form>
-          <div className="bg-[#191e21] hidden md:block content-center ">
-            <img
+
+          <div className="bg-[#191e21] hidden md:block content-center">
+            <Image
               src="/logo_bg.png"
-              alt="Image"
-              className="h-[50%] w-[50%] object-cover dark:brightness-[0.2] dark:grayscale mx-auto"
+              alt="Logo UrbanSpot"
+              width={50}
+              height={50}
+              className="h-[50%] w-[50%] mx-auto"
             />
           </div>
         </CardContent>
       </Card>
+
       <FieldDescription className="px-6 text-center">
         Al iniciar sesión, aceptas nuestros <a href="#">Términos de Servicio</a>{" "}
         y <a href="#">Política de Privacidad</a>.
