@@ -1281,12 +1281,17 @@ function useLeaflet() {
     useEffect(() => {
         if (L && LeafletDraw) return
         if (typeof window !== "undefined") {
-            if (!L) {
-                setL(require("leaflet"))
+            const loadModules = async () => {
+                if (!L) {
+                    const leafletModule = await import("leaflet")
+                    setL(leafletModule)
+                }
+                if (!LeafletDraw) {
+                    const leafletDrawModule = await import("leaflet-draw")
+                    setLeafletDraw(leafletDrawModule)
+                }
             }
-            if (!LeafletDraw) {
-                setLeafletDraw(require("leaflet-draw"))
-            }
+            loadModules()
         }
     }, [L, LeafletDraw])
 
