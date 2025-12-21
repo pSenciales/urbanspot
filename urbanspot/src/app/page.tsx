@@ -1,25 +1,21 @@
 // src/app/page.tsx
 
-import MapLoader from '@/components/map/MapLoader'; // (Ruta actualizada)
-import { HeaderMenu } from '@/components/layout/HeaderMenu'; // 1. Importa el menú
+"use client";
+
+import UrbanMap from '@/components/map/UrbanMap';
 
 export default function Home() {
   
+  const handleMapClick = (coords: { lat: number; lon: number }) => {
+    console.log("¡Clic en el mapa!", coords);
+    // Aquí después añadirás lógica para abrir Dialog y crear POI
+  };
+
   return (
-    
-    <main className="flex flex-col h-screen w-screen">
-      
-      <header className="bg-white shadow-md p-4 z-10 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">🏙️ UrbanSpot</h1>
-        
-        <HeaderMenu />
-      </header>
-
-      {/*Renderizar el Mapa */}
+    <main className="flex flex-col h-full w-full">
       <div className="flex-grow relative">
-        <MapLoader />
+        <UrbanMap onMapClick={handleMapClick} />
       </div>
-
     </main>
   );
 }
