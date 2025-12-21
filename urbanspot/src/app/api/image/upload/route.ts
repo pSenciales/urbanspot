@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import Image from "@/models/Image";
+import POI from "@/models/POI";
 import dbConnect from "@/lib/mongo";
 
 const s3 = new S3Client({
@@ -58,7 +58,10 @@ export async function POST(request: Request) {
 
 
         await dbConnect();
-        await Image.create({ url: finalUrl, poiId, metadata });
+        const poi = await POI.findById(poiId);
+
+        poi.images.push({ url: finalUrl, poiId, metadata });
+        await poi.save();
 
 
         return NextResponse.json({ url: finalUrl, poiId });
