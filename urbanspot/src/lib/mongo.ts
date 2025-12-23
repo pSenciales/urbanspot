@@ -1,13 +1,16 @@
+// src/lib/mongo.ts
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+export default async function dbConnect() {
+    const MONGODB_URI = process.env.MONGODB_URI;
 
-export default dbConnect;
-
-async function dbConnect() {
     if (!MONGODB_URI) {
         throw new Error('Please define the MONGODB_URI environment variable');
     }
-    await mongoose.connect(MONGODB_URI);
-    return mongoose;
+
+    if (mongoose.connection.readyState >= 1) {
+        return mongoose;
+    }
+
+    return await mongoose.connect(MONGODB_URI);
 }

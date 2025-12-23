@@ -3,8 +3,8 @@ import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Twitter from "next-auth/providers/twitter";
-
-
+import dbConnect from "@/lib/mongo";
+import User from "@/models/User";
 
 const { handlers } = NextAuth({
   providers: [
@@ -24,9 +24,30 @@ const { handlers } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (user && account) {
-        const { name, email } = user;
+        const { name, email, image } = user;
         const { provider } = account;
+
         try {
+          // Conectar a MongoDB
+          await dbConnect();
+
+          const existingUser = await User.findOne({ email });
+
+          if (!existingUser) {
+            await User.create({
+              name,
+              email,
+              provider,
+              points: { explorer: 0, photographer: 0 },
+              imagen: image || "",
+            });
+          } else {
+            if (image && existingUser.imagen !== image) {
+              existingUser.imagen = image;
+              await existingUser.save();
+            }
+          }
+
           await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users`, {
             method: "POST",
             headers: {
@@ -40,6 +61,7 @@ const { handlers } = NextAuth({
       }
       return true;
     },
+
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;
@@ -47,7 +69,20 @@ const { handlers } = NextAuth({
       }
       return token;
     },
+
     async session({ session, token }) {
+      try {
+        await dbConnect();
+        const dbUser = await User.findOne({ email: session.user?.email });
+
+        if (dbUser) {
+          session.user.points.explorer = dbUser.points.explorer;
+          session.user.image = dbUser.image;
+        }
+      } catch (error) {
+        console.error("Error fetching user for session", error);
+      }
+
       return {
         ...session,
         accessToken: token.accessToken,

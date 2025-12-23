@@ -1,6 +1,6 @@
 // src/app/components/layout/HeaderMenu.tsx
 
-"use client"; // ¡Importante! Esto es un componente de cliente.
+"use client"; 
 
 import * as React from "react";
 import Link from "next/link";
@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react"; // Icono
 
 // Implementar, signOut para el logout
-// import { signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 export function HeaderMenu() {
   return (
@@ -32,7 +32,7 @@ export function HeaderMenu() {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href="/perfil">​👤​ Perfil</Link>
+          <Link href="/user">​👤​ Perfil</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/clasificacion">​🥇​ Clasificación</Link>
@@ -42,7 +42,7 @@ export function HeaderMenu() {
 
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"
-          // Implementar: onClick={() => signOut()}
+          onClick={() => signOut()}
         >
           ➜] Cerrar sesión
         </DropdownMenuItem>
