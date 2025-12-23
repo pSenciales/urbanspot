@@ -165,3 +165,22 @@
     @apply !border-transparent !bg-transparent;
   }
 }
+
+/* Scrollbar vertical */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(79, 70, 229, 0.6); /* color morado */
+  border-radius: 10px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 70, 229, 0.9);
+}
