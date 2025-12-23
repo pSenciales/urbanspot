@@ -76,8 +76,10 @@ const { handlers } = NextAuth({
         const dbUser = await User.findOne({ email: session.user?.email });
 
         if (dbUser) {
-          session.user.points.explorer = dbUser.points.explorer;
+          console.log(dbUser);
+          session.user.points = dbUser.points;
           session.user.image = dbUser.image;
+          session.user.name = dbUser.name;
         }
       } catch (error) {
         console.error("Error fetching user for session", error);

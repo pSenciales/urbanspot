@@ -28,3 +28,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(user);
 }
 
+export async function PUT(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { email, name, image } = body;
+
+        if (!email) {
+            return NextResponse.json({ error: "Email es requerido" }, { status: 400 });
+        }
+
+        await dbConnect();
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+        }
+
+        // Update fields
+        if (name !== undefined) user.name = name;
+        if (image !== undefined) user.image = image;
+
+        await user.save();
+
+        return NextResponse.json(user);
+    } catch (error) {
+        console.error("Error updating user:", error);
+        return NextResponse.json({ error: "Error actualizando usuario" }, { status: 500 });
+    }
+}

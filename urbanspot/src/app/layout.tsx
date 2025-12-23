@@ -1,9 +1,9 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-import Link from "next/link";
-import { HeaderMenu } from '@/components/layout/HeaderMenu';
+import { ConditionalHeader } from '@/components/layout/ConditionalHeader';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,16 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-screen overflow-hidden`}
       >
-        <header className="bg-white shadow-md p-4 z-10 flex items-center justify-between flex-none">
-                <Link href="/" className="hover:opacity-75 transition-opacity">
-                  <h1 className="text-2xl font-bold text-gray-800 cursor-pointer">
-                    🏙️ UrbanSpot
-                  </h1>
-                </Link>
-                <HeaderMenu />
-        </header>
         <div className="flex-1 relative overflow-y-auto">
-            <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            <ConditionalHeader />
+            {children}
+          </SessionProvider>
         </div>
       </body>
     </html>
