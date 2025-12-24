@@ -31,14 +31,14 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
-        const { email, name, image } = body;
+        const { id, name, image } = body;
 
-        if (!email) {
-            return NextResponse.json({ error: "Email es requerido" }, { status: 400 });
+        if (!id) {
+            return NextResponse.json({ error: "Id es requerido" }, { status: 400 });
         }
 
         await dbConnect();
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ _id: id });
 
         if (!user) {
             return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });

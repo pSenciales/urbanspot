@@ -121,7 +121,7 @@ export default function ProfilePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: session?.user?.email,
+          id: session?.user?.id,
           name: formData.name,
           image: imageUrl,
         }),
@@ -307,6 +307,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+        {JSON.stringify(session)}
       </div>
     );
   }
