@@ -87,9 +87,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             <Image
               src="/logo_bg.png"
               alt="Logo UrbanSpot"
-              width={50}
-              height={50}
-              className="h-[50%] w-[50%] mx-auto"
+              width={200}   
+              height={200}  
+              quality={100} 
+              priority     
+              className="h-[200px] w-[200px] mx-auto"
             />
           </div>
         </CardContent>

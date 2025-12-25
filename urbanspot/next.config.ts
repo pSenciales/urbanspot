@@ -16,7 +16,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "pbs.twimg.com",
-      }
+      },
+      {
+        protocol: "https",
+        hostname: "urbanspot-bucket.s3.eu-central-1.amazonaws.com",
+      },
     ],
   },
 };
