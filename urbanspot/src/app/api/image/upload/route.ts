@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
         const uniqueFileName = `uploads/${poiId}/${uuidv4()}`;
 
-        const { url, metadata } = await uploadImageToS3(file, poiId, uniqueFileName);
+        const { url, metadata } = await uploadImageToS3(file, uniqueFileName);
 
         await dbConnect();
         const poi = await POI.findById(poiId);

@@ -11,7 +11,6 @@ const s3 = new S3Client({
 export interface UploadImageResult {
     url: string;
     metadata: {
-        poiId: string;
         name: string;
         type: string;
         size: string;
@@ -20,7 +19,7 @@ export interface UploadImageResult {
     };
 }
 
-export async function uploadImageToS3(file: File, poiId: string, uniqueFileName: string): Promise<UploadImageResult> {
+export async function uploadImageToS3(file: File, uniqueFileName: string): Promise<UploadImageResult> {
     if (file.type !== "image/jpeg" && file.type !== "image/png" && file.type !== "image/webp" && file.type !== "image/gif" && file.type !== "image/jpg") {
         throw new Error("Tipo de archivo no permitido. Solo se aceptan imágenes.");
     }
@@ -32,7 +31,6 @@ export async function uploadImageToS3(file: File, poiId: string, uniqueFileName:
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const metadata = {
-        poiId,
         name: file.name,
         type: file.type,
         size: file.size.toString(),
