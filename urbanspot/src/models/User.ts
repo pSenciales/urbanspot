@@ -1,15 +1,15 @@
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 
-const UserSchema = new mongoose.Schema({
-    "name": String,
-    "email": { type: String, required: true },
-    "image": String,
-    "provider": { type: String, required: true },
-    "points": {
-        "explorer": { type: Number, default: 0 },
-        "photographer": { type: Number, default: 0 },
-    }
+// const UserSchema = new mongoose.Schema({
+//     "name": String,
+//     "email": { type: String, required: true },
+//     "image": String,
+//     "provider": { type: String, required: true },
+//     "points": {
+//         "explorer": { type: Number, default: 0 },
+//         "photographer": { type: Number, default: 0 },
+//     }
 
-}, { timestamps: true });
+// }, { timestamps: true });
 
-export default mongoose.models.User || mongoose.model('User', UserSchema);
+// export default mongoose.models.User || mongoose.model('User', UserSchema);

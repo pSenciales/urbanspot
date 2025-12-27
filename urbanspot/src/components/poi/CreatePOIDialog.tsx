@@ -61,10 +61,9 @@ export default function CreatePOIDialog({
             lat: location.lat,
             lng: location.lon,
           },
-          author: "Usuario Demo", // Mocked for now
-          images: formData.imageUrl
-            ? [{ url: formData.imageUrl, metadata: {} }]
-            : [],
+          //======================PARA MYSQL TENDRIA QUE TENER O EL CORREO DE AUTHOR O EL ID, NO ME VALE EL NOMBRE PORQUE NO ES UNICO
+          author: 1, // Mocked for now
+          images: formData.imageUrl? [{ url: formData.imageUrl, metadata: {} }] : [], // Deberia de tener mínimo una imagen 
         }),
       });
 
