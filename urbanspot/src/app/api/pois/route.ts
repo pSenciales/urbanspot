@@ -15,9 +15,29 @@ export async function GET() {
     //const pois = await POI.find({});
 
     //=========================MYSQL===================================
-    const pois = await prisma.pOI.findMany();
+    const pois = await prisma.pOI.findMany({
+      include: {
+        tags:true,
+        author: true
+      }
+    });
 
-    return NextResponse.json(pois);
+    // Tratamos POIs para que tengan el mismo formato que el del frontend. De esta forma, evitamos tocar el frontend con el cambio de la base de datos
+    const pois2frontend = pois.map(poi => ({
+      _id: poi.id.toString(),
+      name: poi.name,
+      description: poi.description,
+      location: {
+        lat: poi.locationLat,
+        lng: poi.locationLng
+      },
+      tags: poi.tags.map(tag => tag.tag.toLowerCase()), 
+      author: poi.author.name,
+      ratings: poi.ratings,
+      averageRating: poi.averageRating
+    }));
+
+    return NextResponse.json(pois2frontend);
   } catch (error) {
     return NextResponse.json({ error: 'Error fetching POIs' }, { status: 500 });
   }
