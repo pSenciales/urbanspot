@@ -1,12 +1,12 @@
 // src/auth.ts
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
+// import Google from "next-auth/providers/google";
 
-export const { 
+export const {
   handlers,
   auth,
-  signIn, 
-  signOut 
+  signIn,
+  signOut
 } = NextAuth({
   providers: [
     // ¡COMENTA ESTA LÍNEA!

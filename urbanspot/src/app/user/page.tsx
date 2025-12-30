@@ -307,7 +307,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        {JSON.stringify(session)}
       </div>
     );
   }

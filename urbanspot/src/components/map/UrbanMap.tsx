@@ -11,17 +11,20 @@ import {
 import { useMapEvents, useMap } from "react-leaflet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Search, 
-  Bus, 
-  Landmark, 
-  TreeDeciduous, 
-  Coffee, 
-  Camera, 
-  MapPin 
+import {
+  Search,
+  Bus,
+  Landmark,
+  TreeDeciduous,
+  Coffee,
+  Camera,
+  MapPin,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import CreatePOIDialog from "@/components/poi/CreatePOIDialog";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 type UrbanMapProps = {
   onMapClick: (coords: { lat: number; lon: number }) => void;
@@ -45,15 +48,16 @@ type POI = {
   author: string;
   ratings: number;
   averageRating: number;
+  images?: { url: string; metadata: Record<string, string> }[];
 };
 
-function MapClickHandler({ 
-  onMapClick, 
-  marker, 
+function MapClickHandler({
+  onMapClick,
+  marker,
   setMarker,
   onOpenCreateDialog,
   isAuthenticated
-}: UrbanMapProps & { 
+}: UrbanMapProps & {
   marker: { lat: number; lon: number } | null;
   setMarker: (marker: { lat: number; lon: number } | null) => void;
   onOpenCreateDialog: () => void;
@@ -71,7 +75,7 @@ function MapClickHandler({
   return (
     <>
       {marker && (
-        <MapMarker 
+        <MapMarker
           key={`${marker.lat}-${marker.lon}`}
           position={[marker.lat, marker.lon]}
           ref={(node) => {
@@ -88,9 +92,9 @@ function MapClickHandler({
             }}
           >
             <div className="p-2 min-w-[150px]">
-              <Button 
-                size="sm" 
-                className="w-full" 
+              <Button
+                size="sm"
+                className="w-full"
                 onClick={onOpenCreateDialog}
               >
                 Crear POI aquí
@@ -103,10 +107,10 @@ function MapClickHandler({
   );
 }
 
-function SearchControl({ 
-  onLocationFound 
-}: { 
-  onLocationFound: (lat: number, lon: number, name: string) => void 
+function SearchControl({
+  onLocationFound
+}: {
+  onLocationFound: (lat: number, lon: number, name: string) => void
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -161,7 +165,7 @@ function SearchControl({
   };
 
   return (
-    <div 
+    <div
       ref={(el) => {
         if (el && typeof window !== 'undefined') {
           import('leaflet').then((L) => {
@@ -182,8 +186,8 @@ function SearchControl({
             className="flex-1"
             disabled={isLoading}
           />
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             size="icon"
             disabled={isLoading}
           >
@@ -191,7 +195,7 @@ function SearchControl({
           </Button>
         </form>
       </div>
-      
+
       {showResults && results.length > 0 && (
         <div className="bg-white rounded-lg shadow-lg mt-2 max-h-60 overflow-y-auto">
           {results.map((result, index) => (
@@ -209,19 +213,101 @@ function SearchControl({
   );
 }
 
-function MapSearchHandler({ 
-  onLocationFound 
-}: { 
-  onLocationFound: (lat: number, lon: number) => void 
+function MapSearchHandler({
+  onLocationFound
+}: {
+  onLocationFound: (lat: number, lon: number) => void
 }) {
   const map = useMap();
 
-  const handleLocationFound = (lat: number, lon: number, name: string) => {
+  const handleLocationFound = (lat: number, lon: number) => {
     map.setView([lat, lon], 16);
     onLocationFound(lat, lon);
   };
 
   return <SearchControl onLocationFound={handleLocationFound} />;
+}
+
+function POIPopupContent({ poi }: { poi: POI }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = poi.images || [];
+  const hasImages = images.length > 0;
+  const hasMultipleImages = images.length > 1;
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <div className="p-2 max-w-xs min-w-[200px]">
+      {hasImages && (
+        <div className="relative mb-3 rounded-lg overflow-hidden">
+          <div className="relative h-36 w-full bg-gray-100">
+            <Image
+              src={images[currentImageIndex].url}
+              alt={`${poi.name} - Imagen ${currentImageIndex + 1}`}
+              className="w-full h-full object-cover"
+            />
+
+            {hasMultipleImages && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
+
+            {hasMultipleImages && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(idx);
+                    }}
+                    className={`w-2 h-2 rounded-full transition-colors ${idx === currentImageIndex
+                      ? "bg-white"
+                      : "bg-white/50 hover:bg-white/75"
+                      }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <h3 className="font-bold text-lg">{poi.name}</h3>
+      <p className="text-sm text-gray-600 mb-2">{poi.description}</p>
+      <div className="flex flex-wrap gap-1 mb-2">
+        {poi.tags.map((tag, i) => (
+          <span key={i} className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">
+            {tag}
+          </span>
+        ))}
+      </div>
+      <div className="text-xs text-gray-500">
+        <p>Autor: {poi.author}</p>
+        <p>Valoración: {poi.averageRating} ({poi.ratings} votos)</p>
+      </div>
+    </div>
+  );
 }
 
 export default function UrbanMap({ onMapClick }: UrbanMapProps) {
@@ -284,41 +370,27 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
       <Map center={[36.7202, -4.4214]} zoom={16}>
         <MapTileLayer />
         <MapZoomControl className="top-1 right-1 left-auto" />
-        
+
         {/* Existing POIs */}
         {pois.map((poi) => {
           if (!poi.location || typeof poi.location.lat !== 'number' || typeof poi.location.lng !== 'number') {
             return null;
           }
           return (
-            <MapMarker 
-              key={poi._id} 
+            <MapMarker
+              key={poi._id}
               position={[poi.location.lat, poi.location.lng]}
               icon={getPoiIcon(poi.tags)}
             >
               <MapPopup>
-                <div className="p-2 max-w-xs">
-                  <h3 className="font-bold text-lg">{poi.name}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{poi.description}</p>
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {poi.tags.map((tag, i) => (
-                      <span key={i} className="text-xs bg-gray-100 px-1 rounded">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    <p>Autor: {poi.author}</p>
-                    <p>Valoración: {poi.averageRating} ({poi.ratings} votos)</p>
-                  </div>
-                </div>
+                <POIPopupContent poi={poi} />
               </MapPopup>
             </MapMarker>
           );
         })}
 
-        <MapClickHandler 
-          onMapClick={onMapClick} 
+        <MapClickHandler
+          onMapClick={onMapClick}
           marker={marker}
           setMarker={setMarker}
           onOpenCreateDialog={() => setIsDialogOpen(true)}
@@ -327,9 +399,9 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
         <MapSearchHandler onLocationFound={handleLocationFound} />
       </Map>
 
-      <CreatePOIDialog 
-        isOpen={isDialogOpen} 
-        onClose={() => setIsDialogOpen(false)} 
+      <CreatePOIDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
         location={marker}
         onPoiCreated={() => {
           fetchPois();

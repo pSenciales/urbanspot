@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import User from "@/models/User";
 import dbConnect from "@/lib/mongo";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     //get all users
     await dbConnect();
     const users = await User.find();

@@ -12,15 +12,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react"; // Icono
+// import { Button } from "@/components/ui/button";
+// import { Menu } from "lucide-react"; // Icono
 
 // Implementar, signOut para el logout
 import { signOut } from "next-auth/react";
 import { User } from "next-auth";
 import Image from "next/image";
 
-export function HeaderMenu({ user }: { user: User }) {
+export function HeaderMenu({ user }: { user?: User }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
