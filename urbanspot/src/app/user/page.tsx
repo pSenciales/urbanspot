@@ -4,10 +4,35 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Loading from "@/components/loading/Loading";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Camera, Star, Grid, User as UserIcon, Settings } from "lucide-react";
+
+interface POI {
+  _id: string;
+  name: string;
+  description: string;
+  category: string;
+  location: {
+    lat: number;
+    lng: number;
+  };
+  author: {
+    _id: string;
+    name: string;
+    image: string;
+  } | string;
+  images: {
+    url: string;
+    metadata: Record<string, string>;
+  }[];
+  createdAt: string;
+}
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"profile" | "contributions">("profile");
+
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -19,6 +44,10 @@ export default function ProfilePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [userPois, setUserPois] = useState<POI[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLoadingPois, setIsLoadingPois] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -34,12 +63,38 @@ export default function ProfilePage() {
         image: session.user.image ?? "",
       });
       setPreviewUrl(session.user.image ?? "");
+      fetchPois();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
+
+  const fetchPois = async () => {
+    try {
+      const userId = session?.user?.id;
+      if (!userId) return;
+
+      const response = await fetch(`/api/pois?userId=${userId}`);
+      if (response.ok) {
+        const data: POI[] = await response.json();
+        setUserPois(data);
+      }
+    } catch (error) {
+      console.error("Error fetching POIs:", error);
+    } finally {
+      setIsLoadingPois(false);
+    }
+  };
 
   if (status === "loading") {
     return <Loading />;
   }
+
+  const explorerPoints = session?.user?.points?.explorer || 0;
+  const photographerPoints = session?.user?.points?.photographer || 0;
+  const totalPoints = explorerPoints + photographerPoints;
+
+  const poisCount = userPois.length;
+  const photosCount = userPois.reduce((acc, poi) => acc + (poi.images?.length || 0), 0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -53,14 +108,11 @@ export default function ProfilePage() {
         alert("Por favor selecciona una imagen válida (JPEG, PNG, WEBP, GIF)");
         return;
       }
-
       if (file.size > 4.5 * 1024 * 1024) {
         alert("La imagen es demasiado grande. El tamaño máximo es 4.5MB");
         return;
       }
-
       setSelectedFile(file);
-
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
@@ -71,23 +123,19 @@ export default function ProfilePage() {
 
   const handleImageUpload = async (): Promise<string | null> => {
     if (!selectedFile || !session?.user?.email) return null;
-
     setIsUploadingImage(true);
     try {
       const formDataToUpload = new FormData();
       formDataToUpload.append("file", selectedFile);
       formDataToUpload.append("userId", session.user.email);
-
       const response = await fetch("/api/image/upload/profile", {
         method: "POST",
         body: formDataToUpload,
       });
-
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Error subiendo imagen");
       }
-
       const data = await response.json();
       return data.url;
     } catch (error) {
@@ -103,8 +151,6 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       let imageUrl = formData.image;
-
-      // Upload image if a new file was selected
       if (selectedFile) {
         const uploadedUrl = await handleImageUpload();
         if (uploadedUrl) {
@@ -114,26 +160,20 @@ export default function ProfilePage() {
           return;
         }
       }
-
       const response = await fetch("/api/users", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: session?.user?.id,
           name: formData.name,
           image: imageUrl,
         }),
       });
-
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Error actualizando perfil");
       }
-
       const updatedUser = await response.json();
-
       await update({
         ...session,
         user: {
@@ -142,7 +182,6 @@ export default function ProfilePage() {
           image: updatedUser.image,
         },
       });
-
       setFormData({
         name: updatedUser.name,
         email: updatedUser.email,
@@ -180,131 +219,265 @@ export default function ProfilePage() {
 
   if (session?.user) {
     return (
-      <div className="flex min-h-svh items-center justify-center p-6">
-        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white">
-            <h1 className="text-3xl font-bold">Mi Perfil</h1>
-            <p className="text-blue-100 mt-2">Gestiona tu información personal</p>
+      <div className="min-h-svh bg-gray-50/50 pb-20">
+        {/* Hero Profile Header */}
+        <div className="bg-white border-b">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* Avatar */}
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full opacity-75 group-hover:opacity-100 transition duration-200 blur"></div>
+                <div className="relative">
+                  <Image
+                    src={previewUrl || "/default-avatar.png"}
+                    alt={formData.name || "Usuario"}
+                    width={140}
+                    height={140}
+                    className={`rounded-full border-4 border-white object-cover h-[140px] w-[140px] ${isEditing ? "cursor-pointer" : ""
+                      }`}
+                    onClick={handleImageClick}
+                  />
+                  {isEditing && (
+                    <button
+                      onClick={handleImageClick}
+                      className="absolute bottom-0 right-0 bg-blue-600 text-white p-2.5 rounded-full shadow-lg hover:bg-blue-700 transition-colors border-4 border-white"
+                    >
+                      <Camera className="w-5 h-5" />
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              {/* User Info & Stats */}
+              <div className="text-center md:text-left flex-1">
+                <h1 className="text-3xl font-bold text-gray-900">{session.user.name}</h1>
+                <p className="text-gray-500 font-medium">{session.user.email}</p>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {session.provider || "Usuario"}
+                  </span>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-6 mt-6 max-w-lg mx-auto md:mx-0">
+                  <div className="text-center md:text-left">
+                    <p className="text-2xl font-bold text-gray-900 flex items-center justify-center md:justify-start gap-2">
+                      <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                      {totalPoints}
+                    </p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">Puntos Totales</p>
+                  </div>
+                  <div className="text-center md:text-left border-l border-gray-200 pl-6">
+                    <p className="text-2xl font-bold text-gray-900 flex items-center justify-center md:justify-start gap-2">
+                      <MapPin className="w-5 h-5 text-blue-500" />
+                      {poisCount}
+                    </p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">POIs Creados</p>
+                  </div>
+                  <div className="text-center md:text-left border-l border-gray-200 pl-6">
+                    <p className="text-2xl font-bold text-gray-900 flex items-center justify-center md:justify-start gap-2">
+                      <Camera className="w-5 h-5 text-indigo-500" />
+                      {photosCount}
+                    </p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">Fotos Subidas</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons (Desktop) */}
+              <div className="hidden md:block">
+                {!isEditing && (
+                  <button
+                    onClick={() => {
+                      setIsEditing(true);
+                      setActiveTab("profile");
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Editar Perfil
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+          {/* Tabs Navigation */}
+          <div className="flex border-b border-gray-200 mb-8">
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`flex items-center gap-2 pb-4 px-4 text-sm font-medium transition-all relative ${activeTab === "profile"
+                ? "text-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+                }`}
+            >
+              <UserIcon className="w-4 h-4" />
+              Perfil
+              {activeTab === "profile" && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("contributions")}
+              className={`flex items-center gap-2 pb-4 px-4 text-sm font-medium transition-all relative ${activeTab === "contributions"
+                ? "text-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+                }`}
+            >
+              <Grid className="w-4 h-4" />
+              Contribuciones
+              {activeTab === "contributions" && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full" />
+              )}
+            </button>
           </div>
 
-          <div className="p-8">
-            <div className="flex flex-col items-center mb-8">
-              <div className="relative">
-                <Image
-                  src={previewUrl || "/default-avatar.png"}
-                  alt={formData.name || "Usuario"}
-                  width={128}
-                  height={128}
-                  className={`rounded-full border-4 border-blue-500 shadow-lg ${isEditing ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
-                    }`}
-                  onClick={handleImageClick}
-                />
-                {isEditing && (
-                  <button
-                    type="button"
-                    onClick={handleImageClick}
-                    className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
-                  </button>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-              </div>
-              {isEditing && selectedFile && (
-                <p className="text-sm text-gray-600 mt-2">
-                  Archivo seleccionado: {selectedFile.name}
-                </p>
-              )}
-            </div>
+          {/* Tab Content */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {activeTab === "profile" ? (
+              <div className="max-w-2xl">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Información Personal</h2>
+                <div className="space-y-6 bg-white p-6 rounded-xl border shadow-sm">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                      Nombre
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                      />
+                    ) : (
+                      <p className="text-gray-900 font-medium py-2 px-3 bg-gray-50 rounded-lg">
+                        {formData.name || "No especificado"}
+                      </p>
+                    )}
+                  </div>
 
-            <div className="space-y-6">
-              {/* Name Field */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Nombre
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Tu nombre"
-                  />
-                ) : (
-                  <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-800 font-medium">
-                    {formData.name || "No especificado"}
-                  </p>
-                )}
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Correo Electrónico
+                    </label>
+                    <p className="text-gray-900 font-medium py-2 px-3 bg-gray-50 rounded-lg">
+                      {formData.email || "No especificado"}
+                    </p>
+                  </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Correo Electrónico
-                </label>
-                <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-800 font-medium">
-                  {formData.email || "No especificado"}
-                </p>
-                {isEditing && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    El correo electrónico no se puede modificar
-                  </p>
-                )}
-              </div>
+                  {isEditing && (
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        onClick={handleSave}
+                        disabled={isSaving || isUploadingImage}
+                        className="flex-1 bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50"
+                      >
+                        {isSaving ? (isUploadingImage ? "Subiendo..." : "Guardando...") : "Guardar Cambios"}
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        disabled={isSaving}
+                        className="flex-1 bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-200 transition-all"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Proveedor de Autenticación
-                </label>
-                <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-800 font-medium capitalize">
-                  {session.provider || "No especificado"}
-                </p>
+                  {!isEditing && (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="md:hidden w-full bg-white border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-all"
+                    >
+                      Editar Información
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-8">
+                {/* POIs Section */}
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-blue-500" />
+                    Mis Puntos de Interés
+                  </h3>
+                  {userPois.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {userPois.map((poi) => (
+                        <Card key={poi._id} className="overflow-hidden hover:shadow-lg transition-all group cursor-pointer border-0 shadow-md">
+                          <div className="relative h-48 w-full">
+                            <Image
+                              src={poi.images?.[0]?.url || "/mapa_fondo.jpg"}
+                              alt={poi.name}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold text-gray-900">
+                              {poi.category}
+                            </div>
+                          </div>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold text-gray-900 truncate">{poi.name}</h4>
+                            <p className="text-sm text-gray-500 line-clamp-2 mt-1">{poi.description}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 mb-4">
+                        <MapPin className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900">No has creado ningún punto de interés</h3>
+                      <p className="mt-1 text-sm text-gray-500">¡Explora el mapa y comparte tus lugares favoritos!</p>
+                    </div>
+                  )}
+                </div>
 
-            {/* Action Buttons */}
-            <div className="mt-8 flex gap-4">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving || isUploadingImage}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSaving
-                      ? isUploadingImage
-                        ? "Subiendo imagen..."
-                        : "Guardando..."
-                      : "Guardar Cambios"}
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    disabled={isSaving || isUploadingImage}
-                    className="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Cancelar
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
-                >
-                  Editar Perfil
-                </button>
-              )}
-            </div>
+                {/* Photos Section */}
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Camera className="w-5 h-5 text-indigo-500" />
+                    Mis Fotos ({photosCount})
+                  </h3>
+                  {photosCount > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {userPois.flatMap(poi => poi.images).map((img, idx) => (
+                        <div key={`${img.url}-${idx}`} className="relative aspect-square rounded-lg overflow-hidden group">
+                          <Image
+                            src={img.url}
+                            alt="Contribución"
+                            fill
+                            className="object-cover group-hover:opacity-90 transition-opacity cursor-zoom-in"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-50 mb-4">
+                        <Camera className="w-6 h-6 text-indigo-500" />
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900">No hay fotos para mostrar</h3>
+                      <p className="mt-1 text-sm text-gray-500">Las fotos que subas a los POIs aparecerán aquí.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

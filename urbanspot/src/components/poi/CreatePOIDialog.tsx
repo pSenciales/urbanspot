@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/select";
 import { Upload, X, ImageIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 
 type CreatePOIDialogProps = {
   isOpen: boolean;
@@ -101,7 +100,7 @@ export default function CreatePOIDialog({
       formDataToSend.append("category", formData.category);
       formDataToSend.append("lat", location.lat.toString());
       formDataToSend.append("lng", location.lon.toString());
-      formDataToSend.append("author", session?.user?.name || "Usuario Demo");
+      formDataToSend.append("authorId", session?.user?.id || "");
 
       if (imageFile) {
         formDataToSend.append("image", imageFile);
@@ -211,7 +210,7 @@ export default function CreatePOIDialog({
               <div className="col-span-3">
                 {imagePreview ? (
                   <div className="relative group">
-                    <Image
+                    <img
                       src={imagePreview}
                       alt="Preview"
                       className="w-full h-48 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700"

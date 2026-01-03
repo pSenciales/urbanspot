@@ -9,7 +9,7 @@ const POISchema = new mongoose.Schema({
         lat: { type: Number, required: true },
         lng: { type: Number, required: true },
     },
-    author: { type: String, required: true }, // ID del usuario o nombre
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     ratings: { type: Number, default: 0 },
     averageRating: { type: Number, default: 0 },
     images: [ImageSchema],

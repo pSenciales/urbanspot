@@ -24,7 +24,6 @@ import {
 } from "lucide-react";
 import CreatePOIDialog from "@/components/poi/CreatePOIDialog";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 
 type UrbanMapProps = {
   onMapClick: (coords: { lat: number; lon: number }) => void;
@@ -45,7 +44,7 @@ type POI = {
     lng: number;
   };
   tags: string[];
-  author: string;
+  author: string | { _id: string; name: string; image?: string };
   ratings: number;
   averageRating: number;
   images?: { url: string; metadata: Record<string, string> }[];
@@ -249,7 +248,7 @@ function POIPopupContent({ poi }: { poi: POI }) {
       {hasImages && (
         <div className="relative mb-3 rounded-lg overflow-hidden">
           <div className="relative h-36 w-full bg-gray-100">
-            <Image
+            <img
               src={images[currentImageIndex].url}
               alt={`${poi.name} - Imagen ${currentImageIndex + 1}`}
               className="w-full h-full object-cover"
@@ -302,8 +301,8 @@ function POIPopupContent({ poi }: { poi: POI }) {
           </span>
         ))}
       </div>
-      <div className="text-xs text-gray-500">
-        <p>Autor: {poi.author}</p>
+      <div className="text-xs text-gray-500 flex flex-col gap-1">
+        <p>Autor: {typeof poi.author === 'object' && poi.author?.name ? poi.author.name : 'Autor desconocido'}</p>
         <p>Valoración: {poi.averageRating} ({poi.ratings} votos)</p>
       </div>
     </div>

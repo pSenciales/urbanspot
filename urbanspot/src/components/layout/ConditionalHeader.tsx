@@ -30,7 +30,9 @@ export function ConditionalHeader() {
                         🏙️ UrbanSpot
                     </h1>
                 </Link>
-                <HeaderMenu user={session?.user} />
+                {session?.user && (
+                    <HeaderMenu user={session?.user} />
+                )}
             </header>
         );
     }
