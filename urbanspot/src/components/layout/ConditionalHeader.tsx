@@ -24,7 +24,7 @@ export function ConditionalHeader() {
     } else {
 
         return (
-            <header className="bg-white shadow-md p-4 z-10 flex items-center justify-between flex-none">
+            <header className="bg-white shadow-md p-4 z-1000 flex items-center justify-between flex-none sticky top-0">
                 <Link href="/" className="hover:opacity-75 transition-opacity">
                     <h1 className="text-2xl font-bold text-gray-800 cursor-pointer">
                         🏙️ UrbanSpot

@@ -252,7 +252,7 @@ function POIPopupContent({ poi }: { poi: POI }) {
             <Image
               src={images[currentImageIndex].url}
               alt={`${poi.name} - Imagen ${currentImageIndex + 1}`}
-              width={300}  
+              width={300}
               height={200}
               className="w-full h-full object-cover"
             />
@@ -368,7 +368,7 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full overflow-hidden" style={{ height: 'calc(100vh - 72px)' }}>
       <Map center={[36.7202, -4.4214]} zoom={16}>
         <MapTileLayer />
         <MapZoomControl className="top-1 right-1 left-auto" />

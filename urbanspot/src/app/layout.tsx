@@ -31,12 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-screen overflow-hidden`}
       >
-        <div className="flex-1 relative overflow-y-auto">
-          <SessionProvider>
-            <ConditionalHeader />
+        <SessionProvider>
+          <ConditionalHeader />
+          <div className="flex-1 overflow-hidden">
             {children}
-          </SessionProvider>
-        </div>
+          </div>
+        </SessionProvider>
       </body>
     </html>
   );
