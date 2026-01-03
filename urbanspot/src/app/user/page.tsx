@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Loading from "@/components/loading/Loading";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Camera, Star, Grid, User as UserIcon, Settings } from "lucide-react";
 
 interface POI {
@@ -278,14 +279,14 @@ export default function ProfilePage() {
                   <div className="text-center md:text-left border-l border-gray-200 pl-6">
                     <p className="text-2xl font-bold text-gray-900 flex items-center justify-center md:justify-start gap-2">
                       <MapPin className="w-5 h-5 text-blue-500" />
-                      {poisCount}
+                      {isLoadingPois ? <Skeleton className="h-6 w-8" /> : poisCount}
                     </p>
                     <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">POIs Creados</p>
                   </div>
                   <div className="text-center md:text-left border-l border-gray-200 pl-6">
                     <p className="text-2xl font-bold text-gray-900 flex items-center justify-center md:justify-start gap-2">
                       <Camera className="w-5 h-5 text-indigo-500" />
-                      {photosCount}
+                      {isLoadingPois ? <Skeleton className="h-6 w-8" /> : photosCount}
                     </p>
                     <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">Fotos Subidas</p>
                   </div>
