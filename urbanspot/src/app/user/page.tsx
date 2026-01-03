@@ -179,6 +179,7 @@ export default function ProfilePage() {
   };
 
   if (session?.user) {
+    const avatarSrc = previewUrl || "/avatar.jpg";
     return (
       <div className="flex min-h-svh items-center justify-center p-6">
         <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -192,7 +193,7 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center mb-8">
               <div className="relative">
                 <Image
-                  src={previewUrl || "/default-avatar.png"}
+                  src={avatarSrc}
                   alt={formData.name || "Usuario"}
                   width={128}
                   height={128}

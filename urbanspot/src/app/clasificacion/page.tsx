@@ -11,6 +11,7 @@ interface Props {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+
 async function getLeaderboard(page: number, order: string) {
   await dbConnect();
 
@@ -83,7 +84,7 @@ export default async function ClasificacionPage({ searchParams }: Props) {
     <div className="relative h-full w-full overflow-hidden flex flex-col items-center justify-center p-4">
 
       <div
-        className="fixed inset-0 z-0"
+        className="absolute inset-0 z-0" 
         style={{
           backgroundImage: "url('/mapa_fondo.jpg')",
           backgroundSize: "cover",
@@ -133,7 +134,8 @@ export default async function ClasificacionPage({ searchParams }: Props) {
             </Button>
           </Link>
         </div>
-        <div className="p-6 flex flex-col min-h-0 flex-1">
+        
+        <div className="p-6 flex flex-col min-h-0 flex-1 ">
           <div className="flex-1 overflow-y-auto rounded-lg border border-gray-200 scrollbar-custom">
             <table className="min-w-full table-fixed">
               <thead className="sticky top-0 bg-gray-100 z-10 shadow-sm">
@@ -148,7 +150,8 @@ export default async function ClasificacionPage({ searchParams }: Props) {
               <tbody>
                 {users.map((user: any, index: number) => {
                   const currentRank = startingRank + index + 1;
-
+                  
+                  const avatarSrc = user.image || "/avatar.jpg";
                   let rankDisplay = <span className="font-bold text-gray-500">#{currentRank}</span>;
                   if (page === 1) {
                     if (index === 0) rankDisplay = <span className="text-2xl drop-shadow-sm">🥇</span>;
@@ -163,13 +166,13 @@ export default async function ClasificacionPage({ searchParams }: Props) {
                       </td>
                       <td className="py-3 px-6">
                         <div className="flex items-center">
-                          {user.image ? (
-                            <Image className="w-10 h-10 rounded-full mr-3 border-2 border-white shadow-sm object-cover" src={user.image} alt={user.name} />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 mr-3 flex items-center justify-center text-white font-bold shadow-sm">
-                              {user.name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
+                          <Image
+                              src={avatarSrc}
+                              alt={user.name}
+                              width={40}
+                              height={40}
+                              className="rounded-full mr-3 border-2 border-white shadow-sm object-cover w-10 h-10"
+                            />
                           <span className="font-semibold text-gray-800 truncate max-w-[150px] sm:max-w-xs">{user.name}</span>
                         </div>
                       </td>

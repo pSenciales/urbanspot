@@ -252,6 +252,8 @@ function POIPopupContent({ poi }: { poi: POI }) {
             <Image
               src={images[currentImageIndex].url}
               alt={`${poi.name} - Imagen ${currentImageIndex + 1}`}
+              width={300}  
+              height={200}
               className="w-full h-full object-cover"
             />
 
