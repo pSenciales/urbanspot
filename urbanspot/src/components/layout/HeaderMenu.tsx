@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -38,11 +37,9 @@ export function HeaderMenu({ user }: { user?: User }) {
           className="rounded-full border border-blue-500 p-0.5 cursor-pointer"
         />
       </DropdownMenuTrigger>
-
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
         <DropdownMenuSeparator />
-
         <DropdownMenuItem asChild>
           <Link href="/user">👤 Perfil</Link>
         </DropdownMenuItem>
@@ -50,9 +47,7 @@ export function HeaderMenu({ user }: { user?: User }) {
         <DropdownMenuItem asChild>
           <Link href="/clasificacion">🥇 Clasificación</Link>
         </DropdownMenuItem>
-
         <DropdownMenuSeparator />
-
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"
           onClick={() => signOut()}

@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-
   images: {
     remotePatterns: [
       {
@@ -20,6 +19,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "urbanspot-bucket.s3.eu-central-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "artisplendore.com",
       },
     ],
   },
