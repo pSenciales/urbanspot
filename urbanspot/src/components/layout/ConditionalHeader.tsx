@@ -12,7 +12,7 @@ export function ConditionalHeader() {
     const { data: session, status } = useSession();
 
     useEffect(() => {
-        if (status === 'unauthenticated' && pathname !== '/login') {
+        if (status === 'unauthenticated' && (pathname !== '/login' && pathname !== '/')) {
             redirect('/login');
         }
     }, [status, pathname]);
