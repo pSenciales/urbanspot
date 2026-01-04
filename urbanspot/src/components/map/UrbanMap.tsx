@@ -407,26 +407,36 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
 
   const getPoiIcon = (tags: string[]) => {
     const mainTag = tags[0]?.toLowerCase();
-    const className = "size-6 text-gray-950";
+    const className = "w-5 h-5 text-white drop-shadow-sm"; // White icons for better contrast on gradients
+
     const IconWrapper = ({ children, color }: { children: React.ReactNode, color: string }) => (
-      <div className={`p-1.5 rounded-full shadow-xl ${color} border-2 border-gray-600`}>
-        {children}
+      <div className="relative flex flex-col items-center justify-end w-12 h-12 hover:scale-110 transition-transform duration-200 group cursor-pointer -mt-10">
+        {/* Shadow */}
+        <div className="absolute bottom-1 w-4 h-1 bg-black/20 rounded-full blur-[1px]"></div>
+
+        {/* Pin Body */}
+        <div className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full shadow-md border-2 border-white ${color}`}>
+          {children}
+        </div>
+
+        {/* Pin Tail */}
+        <div className={`absolute bottom-3 z-0 w-4 h-4 rotate-45 ${color} border-r-2 border-b-2 border-white/10`}></div>
       </div>
     );
 
     switch (mainTag) {
       case "movilidad":
-        return <IconWrapper color="bg-blue-500"><Bus className={className} /></IconWrapper>;
+        return <IconWrapper color="bg-gradient-to-br from-blue-400 to-blue-600"><Bus className={className} /></IconWrapper>;
       case "cultura":
-        return <IconWrapper color="bg-purple-500"><Landmark className={className} /></IconWrapper>;
+        return <IconWrapper color="bg-gradient-to-br from-purple-400 to-purple-600"><Landmark className={className} /></IconWrapper>;
       case "naturaleza":
-        return <IconWrapper color="bg-green-500"><TreeDeciduous className={className} /></IconWrapper>;
+        return <IconWrapper color="bg-gradient-to-br from-green-400 to-green-600"><TreeDeciduous className={className} /></IconWrapper>;
       case "ocio":
-        return <IconWrapper color="bg-orange-500"><Coffee className={className} /></IconWrapper>;
+        return <IconWrapper color="bg-gradient-to-br from-orange-400 to-orange-600"><Coffee className={className} /></IconWrapper>;
       case "turismo":
-        return <IconWrapper color="bg-yellow-500"><Camera className={className} /></IconWrapper>;
+        return <IconWrapper color="bg-gradient-to-br from-amber-400 to-amber-600"><Camera className={className} /></IconWrapper>;
       default:
-        return <IconWrapper color="bg-gray-500"><MapPin className={className} /></IconWrapper>;
+        return <IconWrapper color="bg-gradient-to-br from-gray-400 to-gray-600"><MapPin className={className} /></IconWrapper>;
     }
   };
 
