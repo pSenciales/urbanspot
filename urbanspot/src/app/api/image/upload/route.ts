@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import POI from "@/models/POI";
-import dbConnect from "@/lib/mongo";
 import { uploadImageToS3 } from "@/lib/image";
+
+// //==================MONGODB====================
+// import POI from "@/models/POI";
+// import dbConnect from "@/lib/mongo";
+
+//=======================MYSQL====================
+import {prisma} from "@/lib/prisma";
 
 export async function POST(request: Request) {
     try {
@@ -14,25 +19,50 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "No se recibió ningún archivo o id de POI" }, { status: 400 });
         }
 
-
         const uniqueFileName = `uploads/${poiId}/${uuidv4()}`;
+
 
         const { url, metadata } = await uploadImageToS3(file, uniqueFileName);
 
-        await dbConnect();
-        const poi = await POI.findById(poiId);
+        // //=======================MONGODB============================================
+        // await dbConnect();
+        // const poi = await POI.findById(poiId);
+        // poi.images.push({ url, poiId, metadata });
+        // await poi.save();
 
-        poi.images.push({ url, poiId, metadata });
-        await poi.save();
+        //==========================MYSQL===================================
+        
+        // Supongo que poiId es un numero aunque sea string
+        const poiId_number = Number(poiId);
+
+        const poi = await prisma.pOI.findUnique({ 
+            where:  {
+                id: poiId_number
+            }
+        });
+
+        // Sabiendo que existe el poi, actualizamos el poi con la nueva imagen y lo actualizamos en la base de datos
+        await prisma.pOI.update({
+            where: {
+                id: poiId_number
+            },
+            data:{
+                images:{
+                    create: {
+                        url: url,
+                        metadata: metadata
+                    }
+                }
+            }
+        });
+
 
         return NextResponse.json({ url, poiId });
     } catch (error) {
         console.error("Error subiendo imagen:", error);
-
         if (error instanceof Error) {
             return NextResponse.json({ error: error.message }, { status: 400 });
         }
-
         return NextResponse.json({ error: "Error subiendo imagen" }, { status: 500 });
     }
 }       

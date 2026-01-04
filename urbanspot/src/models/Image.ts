@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 
 export const ImageSchema = new mongoose.Schema({
     url: { type: String, required: true },
@@ -8,5 +8,5 @@ export const ImageSchema = new mongoose.Schema({
     averageRating: { type: Number, default: 0 },
 }, { timestamps: true });
 
-const Image = mongoose.models.Image || mongoose.model('Image', ImageSchema);
-export default Image;
+// const Image = mongoose.models.Image || mongoose.model('Image', ImageSchema);
+// export default Image;
