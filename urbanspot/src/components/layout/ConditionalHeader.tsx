@@ -25,11 +25,15 @@ export function ConditionalHeader() {
     } else {
 
         return (
-            <header className="bg-white shadow-md p-4 z-1000 flex items-center justify-between flex-none sticky top-0 overflow-hidden">
+            <header className="bg-white shadow-md px-4 py-1 z-1000 flex items-center justify-between flex-none sticky top-0 overflow-hidden">
                 <Link href="/" className="hover:opacity-75 transition-opacity">
-                    <h1 className="text-2xl font-bold text-gray-800 cursor-pointer">
-                        🏙️ UrbanSpot
-                    </h1>
+                    <div className='flex gap-2 items-center'>
+
+                        <img src="/logo_no_bg.png" alt="logo" height={50} width={50} />
+                        <h1 className="text-2xl font-bold text-gray-800 cursor-pointer flex gap-1">
+                            UrbanSpot
+                        </h1>
+                    </div>
                 </Link>
                 {session?.user ? (
                     <HeaderMenu user={session?.user} />
