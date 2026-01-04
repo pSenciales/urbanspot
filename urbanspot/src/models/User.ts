@@ -8,7 +8,8 @@
 //     "points": {
 //         "explorer": { type: Number, default: 0 },
 //         "photographer": { type: Number, default: 0 },
-//     }
+//     },
+//     "reputation": { type: Number, default: 0 },
 
 // }, { timestamps: true });
 

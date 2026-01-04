@@ -15,7 +15,6 @@ export async function POST(request: Request) {
         const file = formData.get("file") as File;
         const poiId = formData.get("poiId") as string;
 
-
         if (!file || !poiId) {
             return NextResponse.json({ error: "No se recibió ningún archivo o id de POI" }, { status: 400 });
         }
@@ -66,4 +65,4 @@ export async function POST(request: Request) {
         }
         return NextResponse.json({ error: "Error subiendo imagen" }, { status: 500 });
     }
-}
+}       

@@ -6,13 +6,14 @@ import { NextRequest, NextResponse } from "next/server";
 //=================MYSQL========================
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: NextRequest) {
+
+export async function GET() {
     // //=================MONGODB=====================
     // //get all users
     // await dbConnect();
     // const users = await User.find();
 
-    //=================MYSQL=====================
+    //=================MYSQL====================
     //get all users
     const users = await prisma.user.findMany();
 

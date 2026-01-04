@@ -217,7 +217,7 @@ function MapTileLayer({
         resolvedTheme === "dark" && darkAttribution
             ? darkAttribution
             : (attribution ??
-              '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>')
+                '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>')
 
     useEffect(() => {
         if (context) {
@@ -340,7 +340,7 @@ function MapLayers({
         if (tileLayers.length > 0 && !selectedTileLayer) {
             const validDefaultValue =
                 defaultTileLayer &&
-                tileLayers.some((layer) => layer.name === defaultTileLayer)
+                    tileLayers.some((layer) => layer.name === defaultTileLayer)
                     ? defaultTileLayer
                     : tileLayers[0].name
             setSelectedTileLayer(validDefaultValue)
@@ -493,12 +493,12 @@ function MapLayersControl({
 const MapMarker = forwardRef<
     Marker,
     Omit<MarkerProps, "icon"> &
-        Pick<
-            DivIconOptions,
-            "iconAnchor" | "bgPos" | "popupAnchor" | "tooltipAnchor"
-        > & {
-            icon?: ReactNode
-        }
+    Pick<
+        DivIconOptions,
+        "iconAnchor" | "bgPos" | "popupAnchor" | "tooltipAnchor"
+    > & {
+        icon?: ReactNode
+    }
 >(
     (
         {
@@ -785,15 +785,15 @@ function MapLocateControl({
                     isLocating
                         ? "Locating..."
                         : position
-                          ? "Stop tracking"
-                          : "Track location"
+                            ? "Stop tracking"
+                            : "Track location"
                 }
                 aria-label={
                     isLocating
                         ? "Locating..."
                         : position
-                          ? "Stop location tracking"
-                          : "Start location tracking"
+                            ? "Stop location tracking"
+                            : "Start location tracking"
                 }
                 className={cn(
                     "absolute right-1 bottom-1 z-1000 border",
@@ -990,9 +990,9 @@ function MapDrawPolyline({
                 new L.Draw.Polyline(map, {
                     ...(mapDrawHandleIcon
                         ? {
-                              icon: mapDrawHandleIcon,
-                              touchIcon: mapDrawHandleIcon,
-                          }
+                            icon: mapDrawHandleIcon,
+                            touchIcon: mapDrawHandleIcon,
+                        }
                         : {}),
                     showLength,
                     drawError,
@@ -1073,9 +1073,9 @@ function MapDrawPolygon({
                 new L.Draw.Polygon(map, {
                     ...(mapDrawHandleIcon
                         ? {
-                              icon: mapDrawHandleIcon,
-                              touchIcon: mapDrawHandleIcon,
-                          }
+                            icon: mapDrawHandleIcon,
+                            touchIcon: mapDrawHandleIcon,
+                        }
                         : {}),
                     drawError,
                     shapeOptions,

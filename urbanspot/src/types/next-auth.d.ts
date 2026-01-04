@@ -1,5 +1,5 @@
 // types/next-auth.d.ts
-import type { Session as NextAuthSession } from "next-auth";
+import type { Session } from "next-auth";
 
 declare module "next-auth" {
   interface Session {
@@ -13,6 +13,7 @@ declare module "next-auth" {
         explorer: number;
         photographer: number;
       };
+      reputation?: number;
       imagen?: string;
     };
     accessToken?: string;
