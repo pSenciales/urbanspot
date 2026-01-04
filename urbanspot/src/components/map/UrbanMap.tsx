@@ -20,9 +20,13 @@ import {
   Camera,
   MapPin,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ImagePlus,
+  Images,
 } from "lucide-react";
 import CreatePOIDialog from "@/components/poi/CreatePOIDialog";
+import POIGalleryDialog from "@/components/poi/POIGalleryDialog";
+import AddImageToPOIDialog from "@/components/poi/AddImageToPOIDialog";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -117,7 +121,6 @@ function SearchControl({
   const [results, setResults] = useState<SearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
 
-  // Debounce con useEffect
   useEffect(() => {
     if (!searchQuery.trim()) {
       setResults([]);
@@ -228,7 +231,15 @@ function MapSearchHandler({
   return <SearchControl onLocationFound={handleLocationFound} />;
 }
 
-function POIPopupContent({ poi }: { poi: POI }) {
+function POIPopupContent({ 
+  poi, 
+  onOpenGallery,
+  onOpenAddImage,
+}: { 
+  poi: POI;
+  onOpenGallery: () => void;
+  onOpenAddImage: () => void;
+}) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = poi.images || [];
   const hasImages = images.length > 0;
@@ -252,7 +263,9 @@ function POIPopupContent({ poi }: { poi: POI }) {
             <Image
               src={images[currentImageIndex].url}
               alt={`${poi.name} - Imagen ${currentImageIndex + 1}`}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 300px"
+              className="object-cover"
             />
 
             {hasMultipleImages && (
@@ -302,9 +315,33 @@ function POIPopupContent({ poi }: { poi: POI }) {
           </span>
         ))}
       </div>
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-gray-500 mb-3">
         <p>Autor: {poi.author}</p>
         <p>Valoración: {poi.averageRating} ({poi.ratings} votos)</p>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        {hasImages && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1 gap-1"
+            onClick={onOpenGallery}
+          >
+            <Images className="w-4 h-4" />
+            Ver galería
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="flex-1 gap-1"
+          onClick={onOpenAddImage}
+        >
+          <ImagePlus className="w-4 h-4" />
+          Añadir foto
+        </Button>
       </div>
     </div>
   );
@@ -315,6 +352,9 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
   const [marker, setMarker] = useState<{ lat: number; lon: number } | null>(null);
   const [pois, setPois] = useState<POI[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [isAddImageOpen, setIsAddImageOpen] = useState(false);
+  const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
 
   const fetchPois = async () => {
     try {
@@ -339,10 +379,23 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
     onMapClick(coords);
   };
 
+  const handleOpenGallery = (poi: POI) => {
+    setSelectedPOI(poi);
+    setIsGalleryOpen(true);
+  };
+
+  const handleOpenAddImage = (poi: POI) => {
+    setSelectedPOI(poi);
+    setIsAddImageOpen(true);
+  };
+
+  const handleImageAdded = () => {
+    fetchPois(); // Refresh POIs to get updated images
+  };
+
   const getPoiIcon = (tags: string[]) => {
     const mainTag = tags[0]?.toLowerCase();
     const className = "size-6 text-gray-950";
-    // Wrapper div with background color based on category
     const IconWrapper = ({ children, color }: { children: React.ReactNode, color: string }) => (
       <div className={`p-1.5 rounded-full shadow-xl ${color} border-2 border-gray-600`}>
         {children}
@@ -383,7 +436,11 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
               icon={getPoiIcon(poi.tags)}
             >
               <MapPopup>
-                <POIPopupContent poi={poi} />
+                <POIPopupContent 
+                  poi={poi} 
+                  onOpenGallery={() => handleOpenGallery(poi)}
+                  onOpenAddImage={() => handleOpenAddImage(poi)}
+                />
               </MapPopup>
             </MapMarker>
           );
@@ -408,6 +465,25 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
           setMarker(null);
         }}
       />
+
+      {selectedPOI && (
+        <>
+          <POIGalleryDialog
+            isOpen={isGalleryOpen}
+            onClose={() => setIsGalleryOpen(false)}
+            images={selectedPOI.images || []}
+            poiName={selectedPOI.name}
+          />
+
+          <AddImageToPOIDialog
+            isOpen={isAddImageOpen}
+            onClose={() => setIsAddImageOpen(false)}
+            poiId={selectedPOI._id}
+            poiName={selectedPOI.name}
+            onImageAdded={handleImageAdded}
+          />
+        </>
+      )}
     </div>
   );
 }

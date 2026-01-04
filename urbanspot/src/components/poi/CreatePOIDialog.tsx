@@ -214,6 +214,7 @@ export default function CreatePOIDialog({
                     <Image
                       src={imagePreview}
                       alt="Preview"
+                      fill
                       className="w-full h-48 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700"
                     />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
