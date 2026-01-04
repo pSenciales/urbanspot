@@ -6,12 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await dbConnect();
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const formData = await request.formData();
     const imageFile = formData.get('image') as File | null;
 
