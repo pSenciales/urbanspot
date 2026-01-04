@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useSession } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ export default function AddImageToPOIDialog({
   poiName,
   onImageAdded,
 }: AddImageToPOIDialogProps) {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -45,9 +47,7 @@ export default function AddImageToPOIDialog({
       }
       setImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     } else {
       setImageFile(null);
@@ -80,8 +80,13 @@ export default function AddImageToPOIDialog({
     try {
       const formData = new FormData();
       formData.append("image", imageFile);
+      // Append authorId from session
+      const userId = session?.user?.id;
+      if (userId) {
+        formData.append("authorId", userId);
+      }
 
-      const response = await fetch(`/api/pois/${poiId}/images`, {
+      const response = await fetch(`/api/pois/${poiId}/photos`, {
         method: "POST",
         body: formData,
       });
@@ -113,7 +118,7 @@ export default function AddImageToPOIDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] z-1000">
         <DialogHeader>
           <DialogTitle>Añadir imagen a {poiName}</DialogTitle>
           <DialogDescription>
@@ -151,28 +156,14 @@ export default function AddImageToPOIDialog({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`
-                  relative cursor-pointer
-                  w-full h-64 
-                  border-2 border-dashed rounded-lg
-                  flex flex-col items-center justify-center gap-3
-                  transition-all duration-200 ease-in-out
-                  ${
-                    isDragging
-                      ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
-                      : "border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  }
-                `}
+                className={`relative cursor-pointer w-full h-64 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-3 transition-all duration-200 ease-in-out ${isDragging
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
+                  : "border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  }`}
               >
                 <div
-                  className={`
-                  p-3 rounded-full
-                  ${
-                    isDragging
-                      ? "bg-blue-100 dark:bg-blue-900"
-                      : "bg-gray-100 dark:bg-gray-800"
-                  }
-                `}
+                  className={`p-3 rounded-full ${isDragging ? "bg-blue-100 dark:bg-blue-900" : "bg-gray-100 dark:bg-gray-800"
+                    }`}
                 >
                   {isDragging ? (
                     <Upload className="w-8 h-8 text-blue-500" />
@@ -182,9 +173,7 @@ export default function AddImageToPOIDialog({
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {isDragging
-                      ? "Suelta la imagen aquí"
-                      : "Arrastra una imagen o haz clic"}
+                    {isDragging ? "Suelta la imagen aquí" : "Arrastra una imagen o haz clic"}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     PNG, JPG, WEBP o GIF (máx. 4.5MB)

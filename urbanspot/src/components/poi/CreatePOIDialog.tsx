@@ -140,7 +140,7 @@ export default function CreatePOIDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] z-1000">
         <DialogHeader>
           <DialogTitle>Crear nuevo punto de interés</DialogTitle>
           <DialogDescription>
@@ -191,7 +191,7 @@ export default function CreatePOIDialog({
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Selecciona una categoría" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-2000">
                   <SelectItem value="movilidad">Movilidad</SelectItem>
                   <SelectItem value="cultura">Cultura</SelectItem>
                   <SelectItem value="naturaleza">Naturaleza</SelectItem>
@@ -213,7 +213,6 @@ export default function CreatePOIDialog({
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      fill
                       className="w-full h-48 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700"
                     />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">

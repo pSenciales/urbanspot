@@ -47,12 +47,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid author ID' }, { status: 400 });
     }
 
-    let images: { url: string; metadata: Record<string, string> }[] = [];
+    let images: { url: string; metadata: Record<string, string>; author: mongoose.Types.ObjectId }[] = [];
 
     if (imageFile && imageFile.size > 0) {
       const uniqueFileName = `pois/${uuidv4()}-${imageFile.name}`;
       const uploadResult = await uploadImageToS3(imageFile, uniqueFileName);
-      images = [{ url: uploadResult.url, metadata: uploadResult.metadata }];
+      images = [{
+        url: uploadResult.url,
+        metadata: uploadResult.metadata,
+        author: new mongoose.Types.ObjectId(authorId)
+      }];
     }
 
     const poi = await POI.create({
@@ -62,6 +66,14 @@ export async function POST(request: Request) {
       location: { lat, lng },
       author: new mongoose.Types.ObjectId(authorId),
       images,
+    });
+
+    // Award +20 explorer points and +20 reputation for creating a POI
+    await User.findByIdAndUpdate(authorId, {
+      $inc: {
+        'points.explorer': 20,
+        'reputation': 20
+      }
     });
 
     return NextResponse.json(poi, { status: 201 });

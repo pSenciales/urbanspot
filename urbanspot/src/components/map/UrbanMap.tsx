@@ -27,7 +27,9 @@ import {
 import CreatePOIDialog from "@/components/poi/CreatePOIDialog";
 import POIGalleryDialog from "@/components/poi/POIGalleryDialog";
 import AddImageToPOIDialog from "@/components/poi/AddImageToPOIDialog";
+import RatingWidget from "@/components/rating/RatingWidget";
 import { useSession } from "next-auth/react";
+import type { Session } from "next-auth";
 
 type UrbanMapProps = {
   onMapClick: (coords: { lat: number; lon: number }) => void;
@@ -230,14 +232,16 @@ function MapSearchHandler({
   return <SearchControl onLocationFound={handleLocationFound} />;
 }
 
-function POIPopupContent({ 
-  poi, 
+function POIPopupContent({
+  poi,
   onOpenGallery,
   onOpenAddImage,
-}: { 
+  session
+}: {
   poi: POI;
   onOpenGallery: () => void;
   onOpenAddImage: () => void;
+  session: Session | null;
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = poi.images || [];
@@ -315,7 +319,15 @@ function POIPopupContent({
       </div>
       <div className="text-xs text-gray-500 flex flex-col gap-1">
         <p>Autor: {typeof poi.author === 'object' && poi.author?.name ? poi.author.name : 'Autor desconocido'}</p>
-        <p>Valoración: {poi.averageRating} ({poi.ratings} votos)</p>
+      </div>
+      <div className="mt-2 mb-5 border-b border-gray-100">
+        <RatingWidget
+          targetType="POI"
+          targetId={poi._id}
+          currentRating={poi.averageRating}
+          totalVotes={poi.ratings}
+          authorId={typeof poi.author === 'object' ? poi.author._id : poi.author}
+        />
       </div>
 
       {/* Action Buttons */}
@@ -331,15 +343,17 @@ function POIPopupContent({
             Ver galería
           </Button>
         )}
-        <Button
-          size="sm"
-          variant="outline"
-          className="flex-1 gap-1"
-          onClick={onOpenAddImage}
-        >
-          <ImagePlus className="w-4 h-4" />
-          Añadir foto
-        </Button>
+        {session && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1 gap-1"
+            onClick={onOpenAddImage}
+          >
+            <ImagePlus className="w-4 h-4" />
+            Añadir foto
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -434,10 +448,11 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
               icon={getPoiIcon(poi.tags)}
             >
               <MapPopup>
-                <POIPopupContent 
-                  poi={poi} 
+                <POIPopupContent
+                  poi={poi}
                   onOpenGallery={() => handleOpenGallery(poi)}
                   onOpenAddImage={() => handleOpenAddImage(poi)}
+                  session={session}
                 />
               </MapPopup>
             </MapMarker>
@@ -471,6 +486,7 @@ export default function UrbanMap({ onMapClick }: UrbanMapProps) {
             onClose={() => setIsGalleryOpen(false)}
             images={selectedPOI.images || []}
             poiName={selectedPOI.name}
+            poiAuthorId={typeof selectedPOI.author === 'object' ? selectedPOI.author._id : selectedPOI.author}
           />
 
           <AddImageToPOIDialog

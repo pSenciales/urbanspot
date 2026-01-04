@@ -13,6 +13,7 @@ declare module "next-auth" {
         explorer: number;
         photographer: number;
       };
+      reputation?: number;
       imagen?: string;
     };
     accessToken?: string;

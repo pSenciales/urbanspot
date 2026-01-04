@@ -27,6 +27,10 @@ async function getLeaderboard(page: number, order: string) {
     sortStage = { "points.photographer": -1 };
   }
 
+  if (order === "reputation") {
+    sortStage = { "reputation": -1 };
+  }
+
   const users = await User.aggregate([
     {
       $addFields: {
@@ -52,6 +56,7 @@ async function getLeaderboard(page: number, order: string) {
     image: user.image,
     puntos_explorador: user.points?.explorer || 0,
     puntos_fotografo: user.points?.photographer || 0,
+    reputation: user.reputation || 0,
     total: user.totalPoints || 0
   }));
 
@@ -84,7 +89,7 @@ export default async function ClasificacionPage({ searchParams }: Props) {
     <div className="relative h-full w-full overflow-hidden flex flex-col items-center justify-center p-4">
 
       <div
-        className="absolute inset-0 z-0" 
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: "url('/mapa_fondo.jpg')",
           backgroundSize: "cover",
@@ -133,8 +138,17 @@ export default async function ClasificacionPage({ searchParams }: Props) {
               📸 Fotos
             </Button>
           </Link>
+
+          <Link href={`/clasificacion?page=1&order=reputation`}>
+            <Button
+              variant="outline"
+              className={order === "reputation" ? activeBtnClass : inactiveBtnClass}
+            >
+              🏆 Reputación
+            </Button>
+          </Link>
         </div>
-        
+
         <div className="p-6 flex flex-col min-h-0 flex-1 ">
           <div className="flex-1 overflow-y-auto rounded-lg border border-gray-200 scrollbar-custom">
             <table className="min-w-full table-fixed">
@@ -142,15 +156,16 @@ export default async function ClasificacionPage({ searchParams }: Props) {
                 <tr className="bg-gray-100 text-gray-600 uppercase text-xs font-bold tracking-wider text-left">
                   <th className="py-4 px-6 w-20">#Nº</th>
                   <th className="py-4 px-6">Explorador</th>
-                  <th className="py-4 px-6 text-center w-24">🗺️ P.O.I.</th>
-                  <th className="py-4 px-6 text-center w-24">📸 Fotos</th>
-                  <th className="py-4 px-6 text-center w-24">⭐ Total</th>
+                  <th className="py-4 px-6 text-center w-20">🗺️ P.O.I.</th>
+                  <th className="py-4 px-6 text-center w-20">📸 Fotos</th>
+                  <th className="py-4 px-6 text-center w-20">⭐ Total</th>
+                  <th className="py-4 px-6 text-center w-20">🏆 Reputación</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user: any, index: number) => {
                   const currentRank = startingRank + index + 1;
-                  
+
                   const avatarSrc = user.image || "/avatar.jpg";
                   let rankDisplay = <span className="font-bold text-gray-500">#{currentRank}</span>;
                   if (page === 1) {
@@ -167,12 +182,12 @@ export default async function ClasificacionPage({ searchParams }: Props) {
                       <td className="py-3 px-6">
                         <div className="flex items-center">
                           <Image
-                              src={avatarSrc}
-                              alt={user.name}
-                              width={40}
-                              height={40}
-                              className="rounded-full mr-3 border-2 border-white shadow-sm object-cover w-10 h-10"
-                            />
+                            src={avatarSrc}
+                            alt={user.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full mr-3 border-2 border-white shadow-sm object-cover w-10 h-10"
+                          />
                           <span className="font-semibold text-gray-800 truncate max-w-[150px] sm:max-w-xs">{user.name}</span>
                         </div>
                       </td>
@@ -185,6 +200,9 @@ export default async function ClasificacionPage({ searchParams }: Props) {
                       <td className="py-3 px-6 text-center font-bold text-indigo-700 text-lg">
                         {user.total}
                       </td>
+                      <td className="py-3 px-6 text-center font-bold text-amber-600 bg-amber-50/30 rounded-lg">
+                        {user.reputation}
+                      </td>
                     </tr>
                   );
                 })}
@@ -193,6 +211,7 @@ export default async function ClasificacionPage({ searchParams }: Props) {
                   <tr key={`empty-${index}`} className="border-b border-gray-50 bg-gray-50/30">
                     <td className="py-4 px-6 text-center text-gray-300">-</td>
                     <td className="py-4 px-6 text-gray-300 italic">Espacio disponible</td>
+                    <td className="py-4 px-6 text-center text-gray-300">-</td>
                     <td className="py-4 px-6 text-center text-gray-300">-</td>
                     <td className="py-4 px-6 text-center text-gray-300">-</td>
                     <td className="py-4 px-6 text-center text-gray-300">-</td>

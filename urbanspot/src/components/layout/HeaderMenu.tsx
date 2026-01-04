@@ -37,7 +37,7 @@ export function HeaderMenu({ user }: { user?: User }) {
           className="rounded-full border border-blue-500 p-0.5 cursor-pointer"
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="z-1000">
         <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

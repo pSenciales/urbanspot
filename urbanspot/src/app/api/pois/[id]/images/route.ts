@@ -1,18 +1,22 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongo';
+import mongoose from 'mongoose';
 import POI from '@/models/POI';
+import User from '@/models/User';
 import { uploadImageToS3 } from '@/lib/image';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   await dbConnect();
 
   try {
+    const params = await props.params;
     const { id } = params;
     const formData = await request.formData();
+    const authorId = formData.get('authorId') as string;
     const imageFile = formData.get('image') as File | null;
 
     if (!imageFile || imageFile.size === 0) {
@@ -39,9 +43,20 @@ export async function POST(
     poi.images.push({
       url: uploadResult.url,
       metadata: uploadResult.metadata,
+      author: authorId ? new mongoose.Types.ObjectId(authorId) : undefined
     });
 
     await poi.save();
+
+    // Award +5 photographer points and +5 reputation for uploading a photo
+    if (authorId) {
+      await User.findByIdAndUpdate(authorId, {
+        $inc: {
+          'points.photographer': 5,
+          'reputation': 5
+        }
+      });
+    }
 
     return NextResponse.json(poi, { status: 200 });
   } catch (error) {

@@ -8,7 +8,6 @@ export default function Home() {
 
   const handleMapClick = (coords: { lat: number; lon: number }) => {
     console.log("¡Clic en el mapa!", coords);
-    // Aquí después añadirás lógica para abrir Dialog y crear POI
   };
 
   return (

@@ -10,12 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
+import RatingWidget from "@/components/rating/RatingWidget";
+
+type GalleryImage = {
+  _id?: string;
+  url: string;
+  metadata: Record<string, string>;
+  author?: string;
+  ratings?: number;
+  averageRating?: number;
+  poiName?: string;
+  poiId?: string;
+};
 
 type POIGalleryDialogProps = {
   isOpen: boolean;
   onClose: () => void;
-  images: { url: string; metadata: Record<string, string> }[];
+  images: GalleryImage[];
   poiName: string;
+  poiAuthorId: string;
   initialIndex?: number;
 };
 
@@ -24,6 +37,7 @@ export default function POIGalleryDialog({
   onClose,
   images,
   poiName,
+  poiAuthorId,
   initialIndex = 0,
 }: POIGalleryDialogProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -46,24 +60,30 @@ export default function POIGalleryDialog({
     return null;
   }
 
+  const currentImage = images[currentIndex];
+  const imageAuthorId = currentImage.author || poiAuthorId;
+  const currentPoiName = currentImage.poiName || poiName;
+  const currentPoiId = currentImage.poiId;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className="max-w-5xl h-[90vh] p-0"
+      <DialogContent
+        className="max-w-5xl h-[60%] p-0 flex flex-col overflow-hidden z-1000"
         onKeyDown={handleKeyDown}
+        showCloseButton={false}
       >
-        <DialogHeader className="p-4 pb-0">
-          <DialogTitle>{poiName}</DialogTitle>
+        <DialogHeader className="p-4 pb-0 flex-shrink-0">
+          <DialogTitle>{currentPoiName}</DialogTitle>
         </DialogHeader>
-        
-        <div className="relative flex-1 flex items-center justify-center bg-black/5 dark:bg-black/20 p-4">
+
+        <div className="relative flex-1 flex items-center justify-center bg-black/5 dark:bg-black/20 min-h-0 overflow-hidden">
           {/* Main Image */}
-          <div className="relative w-full h-full max-h-[calc(90vh-120px)]">
+          <div className="relative w-full h-full">
             <Image
-              src={images[currentIndex].url}
-              alt={`${poiName} - Imagen ${currentIndex + 1}`}
+              src={currentImage.url}
+              alt={`${currentPoiName} - Imagen ${currentIndex + 1}`}
               fill
-              className="object-contain"
+              className="object-contain h-full"
               sizes="(max-width: 1200px) 100vw, 1200px"
             />
           </div>
@@ -106,19 +126,33 @@ export default function POIGalleryDialog({
           </div>
         </div>
 
+        {/* Image Rating */}
+        {currentImage._id && (
+          <div className="px-4 py-2 border-t border-gray-200 flex-shrink-0 bg-white">
+            <RatingWidget
+              key={currentImage._id}
+              targetType="Image"
+              targetId={currentImage._id}
+              poiId={currentPoiId}
+              currentRating={currentImage.averageRating || 0}
+              totalVotes={currentImage.ratings || 0}
+              authorId={imageAuthorId}
+            />
+          </div>
+        )}
+
         {/* Thumbnail Strip */}
         {images.length > 1 && (
-          <div className="p-4 overflow-x-auto">
+          <div className="p-4 overflow-x-auto flex-shrink-0">
             <div className="flex gap-2 justify-center">
               {images.map((image, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
-                  className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                    idx === currentIndex
-                      ? "border-blue-500 scale-105"
-                      : "border-gray-300 dark:border-gray-600 opacity-60 hover:opacity-100"
-                  }`}
+                  className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${idx === currentIndex
+                    ? "border-blue-500 scale-105"
+                    : "border-gray-300 dark:border-gray-600 opacity-60 hover:opacity-100"
+                    }`}
                 >
                   <Image
                     src={image.url}
