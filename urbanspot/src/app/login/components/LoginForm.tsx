@@ -76,10 +76,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   Iniciar sesión con X
                 </Button>
               </Field>
-
-              <FieldDescription className="text-center">
-                ¿No tienes una cuenta? <a href="#">Regístrate</a>
-              </FieldDescription>
             </FieldGroup>
           </form>
 
@@ -87,20 +83,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             <Image
               src="/logo_bg.png"
               alt="Logo UrbanSpot"
-              width={200}   
-              height={200}  
-              quality={100} 
-              priority     
+              width={200}
+              height={200}
+              quality={100}
+              priority
               className="h-[200px] w-[200px] mx-auto"
             />
           </div>
         </CardContent>
       </Card>
-
-      <FieldDescription className="px-6 text-center">
-        Al iniciar sesión, aceptas nuestros <a href="#">Términos de Servicio</a>{" "}
-        y <a href="#">Política de Privacidad</a>.
-      </FieldDescription>
     </div>
   )
 }
