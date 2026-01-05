@@ -34,6 +34,7 @@ async function getLeaderboard(page: number, order: string) {
       image: true,
       pointsExplorer: true,
       pointsPhotographer: true,
+      reputation: true 
     },
   });
 
@@ -43,11 +44,13 @@ async function getLeaderboard(page: number, order: string) {
       totalPoints: (user.pointsExplorer ?? 0) + (user.pointsPhotographer ?? 0),
     }));
 
-  // Ordenamos o por puntos totales, o por explorador o por fotógrafo
+  // Ordenamos o por puntos totales, o por explorador o por fotógrafo o por reputacion
   if( order === "explorer"){
     usersWithTotal.sort((a,b) => (b.pointsExplorer ?? 0) - (a.pointsExplorer ?? 0) );
   }else if (order === "photographer"){
     usersWithTotal.sort((a,b) => (b.pointsPhotographer ?? 0) - (a.pointsPhotographer ?? 0) );
+  }else if (order === "reputation"){
+    usersWithTotal.sort((a,b) => (b.reputation ?? 0) - (a.reputation ?? 0) );
   }else{
     usersWithTotal.sort((a,b) => b.totalPoints - a.totalPoints); 
   }
@@ -55,14 +58,14 @@ async function getLeaderboard(page: number, order: string) {
   // Obtenemos total de usuarios 
   const totalUsers = await prisma.user.count();
 
-  // Cambiamos el formato de la salida?
+  // Cambiamos el formato para que se adapte al frontend
   const cleanUsers = usersWithTotal.map( user => ({
-    id: user.id.toString(),
+    _id: user.id.toString(),
     name: user.name || "Usuario Anónimo",
     image: user.image,
     puntos_explorador: user.pointsExplorer || 0,
     puntos_fotografo: user.pointsPhotographer || 0,
-    // ==============================AGREGAR REPUTACION
+    reputation: user.reputation || 0,
     total: user.totalPoints
   }));
   

@@ -108,6 +108,7 @@ const { handlers } = NextAuth({
           session.user.image = dbUser.image;
           session.user.name = dbUser.name;
           session.user.id = dbUser.id.toString(); // Cambiamos _id por id
+          session.user.reputation = dbUser.reputation;
         } else {
           throw new Error("User not found");
         }

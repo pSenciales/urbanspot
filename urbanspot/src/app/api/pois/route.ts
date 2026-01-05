@@ -4,51 +4,57 @@ import { v4 as uuidv4 } from 'uuid';
 // //============MONGODB=====================
 // import dbConnect from '@/lib/mongo';
 // import POI from '@/models/POI';
-// import mongoose from 'mongoose'; <------
-// import User from '@/models/User'; <------
+// import mongoose from 'mongoose'; 
+// import User from '@/models/User'; 
 
 // ==============MYSQL===================
 import { prisma } from '@/lib/prisma';
 import { TagEnum } from '@prisma/client';
 
-//============================VERSION NUEVA DE GET DE MONGO DB==> ADAPTARLO A PRISMA. DEJO AMBAS POR SI ACASO
 export async function GET(request: Request) {
-  await dbConnect();
-  try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    let query = {};
-    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
-      query = { author: new mongoose.Types.ObjectId(userId) };
-    }
-
-    const pois = await POI.find(query).populate({
-      path: 'author',
-      select: 'name image',
-      model: User
-    });
-
-    return NextResponse.json(pois);
-  } catch (error) {
-    console.error('Error fetching POIs:', error);
-    return NextResponse.json({ error: 'Error fetching POIs' }, { status: 500 });
-  }
-}
-
-//=========================VERSION A ACTUALIZAR DE GET
-export async function GET() {
 
   //================================MONGODB============================
   // await dbConnect();
   try {
-    //const pois = await POI.find({});
+    const { searchParams } = new URL(request.url);
+    const userIdParam = searchParams.get('userId');
 
+    //============================MONGODB==============================
+    // let query = {};
+    // if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+    //   query = { author: new mongoose.Types.ObjectId(userId) };
+    // }
+
+    // const pois = await POI.find(query).populate({
+    //   path: 'author',
+    //   select: 'name image',
+    //   model: User
+    // });
+
+    // return NextResponse.json(pois);
+    
     //=========================MYSQL===================================
+    
+    // Verificamos que es correcto
+    let userId: number | undefined;
+
+    if (userIdParam !== null) {
+      const parsed = Number(userIdParam);
+
+      if (Number.isInteger(parsed) && parsed > 0) {
+        userId = parsed;
+      }
+    }
+
+    // Pillamos el Poi junto con el tag y autor
     const pois = await prisma.pOI.findMany({
+      where:  {
+        authorId: userId
+      },
       include: {
-        tags:true,
-        author: true
+        tags: true,
+        author: true,
+        images: true
       }
     });
 
@@ -62,9 +68,23 @@ export async function GET() {
         lng: poi.locationLng
       },
       tags: poi.tags.map(tag => tag.tag.toLowerCase()), 
-      author: poi.author.name,
+      author: {
+        _id: poi.author.id.toString(),
+        name: poi.author.name,
+        image: poi.author.image
+      },
       ratings: poi.ratings,
-      averageRating: poi.averageRating
+      averageRating: poi.averageRating,
+      images: poi.images.map(image => 
+        ({
+          _id: image.id.toString(),
+          url: image.url,
+          metadata: image.metadata,
+          author: image.authorId?.toString(),
+          averageRating: image.averageRating
+
+        })
+      )
     }));
 
     return NextResponse.json(pois2frontend);
@@ -80,7 +100,6 @@ export async function POST(request: Request) {
   // await dbConnect();
   try {
 
-  //=========================================================================================================NUEVA PARTE AGREGADA. TOCARLA EN LOCAL MEJOR
     const formData = await request.formData();
 
     const name = formData.get('name') as string;
@@ -88,54 +107,72 @@ export async function POST(request: Request) {
     const category = formData.get('category') as string;
     const lat = parseFloat(formData.get('lat') as string);
     const lng = parseFloat(formData.get('lng') as string);
-    const authorId = formData.get('authorId') as string;
+    const authorId = Number(formData.get('authorId'));
     const imageFile = formData.get('image') as File | null;
 
-    if (!authorId || !mongoose.Types.ObjectId.isValid(authorId)) {
+    //================================MONGODB============================
+    // if (!authorId || !mongoose.Types.ObjectId.isValid(authorId)) {
+    //   return NextResponse.json({ error: 'Invalid author ID' }, { status: 400 });
+    // }
+
+    // let images: { url: string; metadata: Record<string, string>; author: mongoose.Types.ObjectId }[] = [];
+
+    // if (imageFile && imageFile.size > 0) {
+    //   const uniqueFileName = `pois/${uuidv4()}-${imageFile.name}`;
+    //   const uploadResult = await uploadImageToS3(imageFile, uniqueFileName);
+    //   images = [{
+    //     url: uploadResult.url,
+    //     metadata: uploadResult.metadata,
+    //     author: new mongoose.Types.ObjectId(authorId)
+    //   }];
+    // }
+
+    // const poi = await POI.create({
+    //   name,
+    //   description,
+    //   tags: [category],
+    //   location: { lat, lng },
+    //   author: new mongoose.Types.ObjectId(authorId),
+    //   images,
+    // });
+
+    // // Award +20 explorer points and +20 reputation for creating a POI
+    // await User.findByIdAndUpdate(authorId, {
+    //   $inc: {
+    //     'points.explorer': 20,
+    //     'reputation': 20
+    //      }
+    // });
+
+    //==========================MYSQL==================================
+
+    // Comprobamos que es un tipo number
+    if (!Number.isInteger(authorId) || authorId <= 0) {
       return NextResponse.json({ error: 'Invalid author ID' }, { status: 400 });
     }
 
-    let images: { url: string; metadata: Record<string, string>; author: mongoose.Types.ObjectId }[] = [];
-
+    const images = [];
+    // Subimos la imagen al repositorio
     if (imageFile && imageFile.size > 0) {
       const uniqueFileName = `pois/${uuidv4()}-${imageFile.name}`;
       const uploadResult = await uploadImageToS3(imageFile, uniqueFileName);
-      images = [{
+      // Creamos la imagen
+      images.push({ 
         url: uploadResult.url,
         metadata: uploadResult.metadata,
-        author: new mongoose.Types.ObjectId(authorId)
-      }];
+        author:{
+          connect: { id: authorId}
+        }
+      });
     }
 
-    const poi = await POI.create({
-      name,
-      description,
-      tags: [category],
-      location: { lat, lng },
-      author: new mongoose.Types.ObjectId(authorId),
-      images,
-    });
+    // Comprobamos que la categoría es correcta, aunque siempre lo sea
+    if(!category){
+      return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
+    }
 
-    // Award +20 explorer points and +20 reputation for creating a POI
-    await User.findByIdAndUpdate(authorId, {
-      $inc: {
-        'points.explorer': 20,
-        'reputation': 20
-         }
-    });
-
-    //======================================================================================================= COMIENZO DE PARTE ANTIGUA. CAMBIARLA MEJOR EN LOCAL
-    const body = await request.json();
-
-    //================================MONGODB============================
-    // const poi = await POI.create(body);
-
-    //==========================MYSQL==================================
-    // Desglosamos en partes
-    const { name, description, tags, location: {lat, lng}, author, images}= body;
-
-    // Transformamos a enums y a su vez a JSON con tags
-    const tagsEnum = tags.map((tag: string) => ({tag: tag.toUpperCase() as TagEnum}));
+    // Sólo recibimos una categoria, así que uno únicamente que mapear
+    const tagsEnum = {tag: category.toUpperCase() as TagEnum};
 
     // Creamos POI, la imagen y el tag. 
     const poi = await prisma.pOI.create({
@@ -155,12 +192,21 @@ export async function POST(request: Request) {
 
         author: {
           connect: {
-            id: author
+            id: authorId
           }
         }
       }
     });
-    //===================================================================================================== ACABA AQUI LO QUE HAY QUE MODIFICAR EN LOCAL
+
+    // Aumentamos la reputacion del usuario
+    await prisma.user.update({
+      where: { id: authorId },
+      data: {
+        pointsExplorer: { increment: 20 },
+        reputation: { increment: 20 },
+      },
+    });
+
     return NextResponse.json(poi, { status: 201 });
   } catch (error) {
     console.error(error);

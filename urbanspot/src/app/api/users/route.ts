@@ -66,8 +66,11 @@ export async function PUT(request: NextRequest) {
         const body = await request.json();
         const { id, name, image } = body;
 
-        if (!id) {
-            return NextResponse.json({ error: "Id es requerido" }, { status: 400 });
+        // Verificamos que es un number
+        const id_number = Number(id);
+
+        if (!id || Number.isNaN(id_number)) {
+            return NextResponse.json({ error: "Id es requerido y debe de ser un numero" }, { status: 400 });
         }
 
         // //========================MONGODB======================
@@ -77,7 +80,7 @@ export async function PUT(request: NextRequest) {
         //======================MYSQL============================
         const user = await prisma.user.findUnique({
             where: {
-                id: id
+                id: id_number
             },
         });
 
@@ -96,7 +99,7 @@ export async function PUT(request: NextRequest) {
         // Ya sabemos que existe el usuario, así que podemos actualizar sin riesgo a que devuelva error de no encontrado
         await prisma.user.update({
             where: {
-                id: id
+                id: id_number
             },
             data: {
                 name: name ?? undefined, // Si name == undefined, toma el undefined. Al ser un undefined explicito el segundo, lo ignora y no actualiza el campo

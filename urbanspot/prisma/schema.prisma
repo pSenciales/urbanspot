@@ -32,21 +32,32 @@ model User {
   image               String?   
   pointsExplorer      Int  @default(0)
   pointsPhotographer  Int @default(0)
+  reputation          Int @default(0)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  POIs                POI[]    @relation("UserPOIs")
+  POIs                POI[]         @relation("UserPOIs")
+  ratingPois          RatingPoi[]   @relation("RatingPOIUsers")
+  ratingImages        RatingImage[] @relation("RatingImageUsers")
+  images              Image[]       @relation("ImageUser")
 }
 
 model Image {
-  id        Int      @id @default(autoincrement())
-  url       String
-  metadata  Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  url                 String
+  metadata            Json
+  ratings             Int @default(0)
+  averageRating       Float @default(0) 
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  poiId     Int
-  poi       POI      @relation("ImagePOIs", fields: [poiId], references: [id])
+  poiId               Int
+  poi                 POI           @relation("ImagePOIs", fields: [poiId], references: [id])
+
+  authorId            Int? 
+  author              User?          @relation("ImageUser", fields: [authorId], references: [id])
+
+  ratingImages        RatingImage[] @relation("RatingImages")
 }
 
 model POI {
@@ -62,8 +73,10 @@ model POI {
   updatedAt       DateTime  @updatedAt
 
   authorId        Int
-  author          User      @relation("UserPOIs", fields: [authorId], references: [id])
-  images          Image[]   @relation("ImagePOIs")
+  author          User        @relation("UserPOIs", fields: [authorId], references: [id])
+
+  images          Image[]     @relation("ImagePOIs")
+  ratingPoi       RatingPoi[] @relation("RatingPOIs")
 }
 
 model Tag{
@@ -73,4 +86,32 @@ model Tag{
   poi       POI     @relation("tagPOIs", fields:[poiId], references:[id])
 
   @@id([poiId, tag])
+}
+
+model RatingPoi{
+  score       Float @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  poiId       Int 
+  poi         POI     @relation("RatingPOIs", fields:[poiId], references:[id])
+
+  authorId    Int 
+  author      User    @relation("RatingPOIUsers", fields: [authorId], references: [id])
+
+  @@id([poiId, authorId])
+}
+
+model RatingImage{
+  score       Float @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  imageId     Int 
+  image       Image     @relation("RatingImages", fields:[imageId], references:[id])
+
+  authorId    Int 
+  author      User      @relation("RatingImageUsers", fields: [authorId], references: [id])
+
+  @@id([imageId, authorId])
 }
