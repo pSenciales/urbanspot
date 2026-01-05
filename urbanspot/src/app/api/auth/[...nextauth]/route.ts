@@ -2,7 +2,7 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import Twitter from "next-auth/providers/twitter";
+// import Twitter from "next-auth/providers/twitter";
 
 // //============================MONGODB==============
 // import dbConnect from "@/lib/mongo";
@@ -12,6 +12,7 @@ import Twitter from "next-auth/providers/twitter";
 import { prisma } from "@/lib/prisma";
 
 const { handlers } = NextAuth({
+  trustHost: true,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID ?? "",
@@ -21,10 +22,10 @@ const { handlers } = NextAuth({
       clientId: process.env.GOOGLE_ID ?? "",
       clientSecret: process.env.GOOGLE_SECRET ?? "",
     }),
-    Twitter({
-      clientId: process.env.TWITTER_ID ?? "",
-      clientSecret: process.env.TWITTER_SECRET ?? "",
-    }),
+    // Twitter({
+    //   clientId: process.env.TWITTER_ID ?? "",
+    //   clientSecret: process.env.TWITTER_SECRET ?? "",
+    // }),
   ],
   callbacks: {
     async signIn({ user, account }) {

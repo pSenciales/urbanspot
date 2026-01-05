@@ -60,7 +60,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 </Button>
 
                 {/* X */}
-                <Button
+                {/* <Button
                   variant="outline"
                   type="button"
                   onClick={() => signIn("twitter")}
@@ -74,7 +74,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     height={20}
                   />
                   Iniciar sesión con X
-                </Button>
+                </Button> */}
               </Field>
             </FieldGroup>
           </form>

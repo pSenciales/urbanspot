@@ -14,9 +14,10 @@ cd ./urbanspot
 npm i
 ```
 
-### Ejecutar
+### Ejecutar si vas a desplegarlo en IaaS
 
 ```
+npx prisma generate
 npm run dev
 
 // estará disponible en http://localhost:3000
